@@ -55,3 +55,12 @@ CodeCoverage/
 *.VisualState.xml
 TestResult.xml
 nunit-*.xml
+
+appsettings.Development.json
+appsettings.*.local.json
+*.user
+
+# Visual Studio cache/options directory
+.vs/
+*.sqlite
+slnx.sqlite
