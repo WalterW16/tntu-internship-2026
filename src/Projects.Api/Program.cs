@@ -1,19 +1,40 @@
+using Asp.Versioning;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Cosmos;
-using Projects.Api.Models;
+using Projects.Api.Data;
+using Projects.Api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
+var connectionString = builder.Configuration.GetConnectionString("ProjectContext") ?? throw new InvalidOperationException("Connection string 'ProjectContext' not found.");
+
 var cosmosEndpoint = builder.Configuration["CosmosDb:Endpoint"];
 var cosmosKey = builder.Configuration["CosmosDb:Key"];
 var databaseName = builder.Configuration["CosmosDb:DatabaseName"];
+
 // Add services to the container.
 
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+
 builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddRouting(options => options.LowercaseUrls = true);
 builder.Services.AddSwaggerGen();
+builder.Services.AddApiVersioning(options => {
+    options.DefaultApiVersion = new ApiVersion(1);
+    options.ReportApiVersions = true;
+    options.AssumeDefaultVersionWhenUnspecified = true;
+    options.ApiVersionReader = ApiVersionReader.Combine(
+        new UrlSegmentApiVersionReader(),
+        new HeaderApiVersionReader("Projects-Api-Version"));
+})
+.AddMvc() // This is needed for controllers
+.AddApiExplorer(options => {
+    options.GroupNameFormat = "'v'V";
+    options.SubstituteApiVersionInUrl = true;
+});
+
 builder.Services.AddDbContext<ProjectContext>(opt =>
 opt.UseCosmos(cosmosEndpoint, cosmosKey, databaseName));
+builder.Services.AddScoped<IProjectService, ProjectsService>();
 
 var app = builder.Build();
 
