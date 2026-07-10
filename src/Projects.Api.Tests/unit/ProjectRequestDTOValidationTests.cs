@@ -3,7 +3,7 @@ using Projects.Api.Models;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
-namespace Projects.Api.Tests {
+namespace Projects.Api.Tests.unit {
     public static class ValidationHelper {
         public static IList<ValidationResult> ValidateModel(object model) {
             var validationResults = new List<ValidationResult>();
@@ -12,7 +12,7 @@ namespace Projects.Api.Tests {
             return validationResults;
         }
     }
-    public class CreateProjectTests {
+    public class ProjectRequestDTOValidationTests {
         [Theory]
         [InlineData(null)]
         [InlineData("")]
