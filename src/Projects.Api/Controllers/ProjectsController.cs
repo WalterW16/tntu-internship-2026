@@ -1,9 +1,11 @@
 using Asp.Versioning;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Azure.Cosmos;
 using Microsoft.EntityFrameworkCore;
 using Projects.Api.Data;
 using Projects.Api.Models;
 using Projects.Api.Services;
+using System.Net.NetworkInformation;
 
 [ApiVersion("1.0")]
 [Route("api/v{version:apiVersion}/[controller]")]
@@ -35,5 +37,21 @@ public class ProjectsController : ControllerBase
    public async Task<ActionResult<List<Project>>> GetNonArchivedProjects() {
         List<Project> result = _service.GetListOfNonArchivedProjects();
         return Ok(result);
+    }
+
+    [HttpGet("{id}")]
+    [ProducesResponseType(typeof(Project), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<Project>> GetProjectById(Guid id) {
+        Project project = _service.GetProjectById(id);
+        if (project != null) {
+            return Ok(project);
+        }
+        return NotFound(new ProblemDetails{
+            Status = StatusCodes.Status404NotFound,
+            Title = "Project not found",
+            Detail = $"Project with ID '{id}' does not exist."
+        });                                 
     }
 }
