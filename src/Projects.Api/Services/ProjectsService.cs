@@ -14,6 +14,10 @@ namespace Projects.Api.Services  {
             _context.SaveChanges();
             return project;
         }
-        
+        public List<Project> GetListOfNonArchivedProjects() {
+            List<Project> list = _context.Projects.Where(p => !p.isArchived).OrderByDescending(p => p.createdAt).ToList();
+            return list;
+        }
+
     }
 }
