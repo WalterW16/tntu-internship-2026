@@ -20,4 +20,8 @@
     <Using Include="Xunit" />
   </ItemGroup>
 
+  <ItemGroup>
+	  <ProjectReference Include="D:\TNTU\Practise 2026\Intership_project-2026\tntu-internship-2026\src\Projects.Api\Projects.Api.csproj" />
+  </ItemGroup>
+
 </Project>
