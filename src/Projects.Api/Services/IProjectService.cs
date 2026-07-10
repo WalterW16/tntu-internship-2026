@@ -4,5 +4,6 @@ namespace Projects.Api.Services {
     public interface IProjectService {
         public Project CreateProject(ProjectRequestDTO projectRequestDTO);
         public List<Project> GetListOfNonArchivedProjects();
+        public Project GetProjectById(Guid guid); 
     }
 }

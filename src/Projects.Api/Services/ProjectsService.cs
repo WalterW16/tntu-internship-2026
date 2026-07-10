@@ -8,7 +8,7 @@ namespace Projects.Api.Services  {
          _context = context;
         }
         public Project CreateProject(ProjectRequestDTO projectRequestDTO) {
-            Project project = new Project(projectRequestDTO.name, projectRequestDTO.description);      
+            Project project = new Project(projectRequestDTO.name, projectRequestDTO.description);     
             
             _context.Add(project);
             _context.SaveChanges();
@@ -18,6 +18,9 @@ namespace Projects.Api.Services  {
             List<Project> list = _context.Projects.Where(p => !p.isArchived).OrderByDescending(p => p.createdAt).ToList();
             return list;
         }
-
+        public Project GetProjectById(Guid guid) {
+            Project project = _context.Projects.Find(guid);
+            return project;
+        }
     }
 }
