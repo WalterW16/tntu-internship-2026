@@ -16,8 +16,7 @@ public class ProjectsController : ControllerBase
     {
         _service = service;
     }
-    // POST: api/Project
-    // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+    // POST: api/v1/projects
     [HttpPost]
     [ProducesResponseType(typeof(Project), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
@@ -28,5 +27,13 @@ public class ProjectsController : ControllerBase
          nameof(PostProject),
          new { id = result.id },
          result);
+    }
+
+    //GET: api/v1/projects
+    [HttpGet]
+    [ProducesResponseType(typeof(Project), StatusCodes.Status200OK)]
+   public async Task<ActionResult<List<Project>>> GetNonArchivedProjects() {
+        List<Project> result = _service.GetListOfNonArchivedProjects();
+        return Ok(result);
     }
 }
