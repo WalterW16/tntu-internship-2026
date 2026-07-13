@@ -36,7 +36,7 @@ Start here based on your role:
 | [Architecture and Tech Stack](docs/architecture/architecture-and-tech-stack.md) | Students, mentors | System design, conventions, ADRs, learning links |
 | [System Overview](docs/domain/system-overview.md) | Students, mentors | Domain model, business rules, entity definitions |
 | [One-Month Schedule](docs/internship-plan/one-month-schedule.md) | Students, mentors | Week-by-week plan, demo script, grading rubric |
-| [User Stories](docs/user-stories/README.md) | Students | 18 user stories with acceptance criteria and API contracts |
+| [User Stories](docs/user-stories/README.md) | Students | 19 user stories with acceptance criteria and API contracts |
 
 ---
 
@@ -58,6 +58,7 @@ Start here based on your role:
 | ORM | Entity Framework Core + Cosmos DB provider |
 | Database | Azure Cosmos DB (free tier) |
 | Hosting | Azure App Service F1 |
+| Observability | Azure Application Insights |
 | CI/CD | GitHub Actions |
 | Testing | xUnit |
 | Optional | Docker, Docker Compose |
@@ -72,7 +73,7 @@ Full details and documentation links: [Architecture and Tech Stack](docs/archite
 |--------|---------|-------|
 | Week 1 | US-001 – US-003 | Projects API — create, list, get |
 | Week 2 | US-004 – US-008 | Projects complete + Tasks API start |
-| Week 3 | US-009 – US-015 | Tasks complete + Azure + CI/CD |
+| Week 3 | US-009 – US-015, US-019 | Tasks complete + Azure + CI/CD + observability |
 | Week 4 | US-016 – US-018 (optional) | Filter, Docker, final demo |
 
 Full index: [User Stories](docs/user-stories/README.md).
@@ -95,7 +96,7 @@ TNTU.Internship2026/
     │   └── one-month-schedule.md
     └── user-stories/
         ├── README.md
-        └── US-001-create-project.md … US-018-docker-compose-local.md
+        └── US-001-create-project.md … US-019-application-insights.md
 ```
 
 Planned source layout (created during Week 1):

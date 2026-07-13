@@ -61,6 +61,9 @@ Each story file follows this structure:
 | US-013 | Consistent error responses (RFC 7807) | Both | Must | Week 3–4 | [US-013-consistent-error-responses.md](US-013-consistent-error-responses.md) |
 | US-014 | GitHub Actions CI — run tests on PR | Both | Must | Week 3 | [US-014-github-actions-ci.md](US-014-github-actions-ci.md) |
 | US-015 | GitHub Actions CD — deploy to Azure | Both | Must | Week 3 | [US-015-github-actions-cd.md](US-015-github-actions-cd.md) |
+| US-019 | Application Insights observability | Both | Must | Week 3 | [US-019-application-insights.md](US-019-application-insights.md) |
+
+> **Observability:** US-019 introduces Azure Application Insights — see also [Architecture — Observability](../architecture/architecture-and-tech-stack.md#observability).
 
 ---
 
@@ -93,6 +96,7 @@ flowchart TD
   US013[US-013 Error responses]
   US014[US-014 CI]
   US015[US-015 CD]
+  US019[US-019 App Insights]
   US016[US-016 Filter by status]
 
   US001 --> US002
@@ -108,6 +112,8 @@ flowchart TD
   US005 --> US006
   US007 --> US016
   US014 --> US015
+  US015 --> US019
+  US006 --> US019
 ```
 
 ---

@@ -344,21 +344,127 @@ Register a typed `HttpClient` in Tasks.Api with a configurable base URL:
 
 ## Observability
 
+Observability means understanding system behavior from the outside — what requests are flowing, how long they take, what failed, and why — without attaching a debugger to production. For this internship, observability is a **required** topic implemented with **Azure Application Insights**.
+
+### The three pillars (simplified)
+
+| Pillar | What it answers | How we implement it |
+|--------|-----------------|---------------------|
+| **Logs** | What happened? | `ILogger<T>` → Application Insights traces |
+| **Metrics** | How much / how fast? | Request duration, dependency duration, failure rate |
+| **Traces** | What path did a request take? | End-to-end request telemetry with dependency spans |
+
+### Architecture
+
+```mermaid
+flowchart LR
+  subgraph apps [App Services]
+    ProjectsApi[Projects.Api]
+    TasksApi[Tasks.Api]
+  end
+
+  subgraph observability [Azure Monitor]
+    AppInsights[Application Insights]
+    LiveMetrics[Live Metrics]
+    Failures[Failures blade]
+    Perf[Performance blade]
+  end
+
+  ProjectsApi -->|telemetry| AppInsights
+  TasksApi -->|telemetry| AppInsights
+  AppInsights --> LiveMetrics
+  AppInsights --> Failures
+  AppInsights --> Perf
+```
+
+Both APIs send telemetry to a **shared** Application Insights resource (free tier: 5 GB/month ingestion). Each App Service is linked via the `APPLICATIONINSIGHTS_CONNECTION_STRING` application setting.
+
+### What to collect
+
+| Signal | Source | Example |
+|--------|--------|---------|
+| HTTP requests | Auto-instrumentation | `POST /api/v1/projects` — 201, 45 ms |
+| Outgoing HTTP | Tasks.Api → Projects.Api | Dependency type `Http`, target host |
+| Cosmos DB calls | EF Core / SDK | Dependency type `Azure DocumentDB` |
+| Exceptions | Unhandled + logged | Validation errors, 502 from upstream |
+| Custom events | `ILogger` | `"Creating project {Name}"` |
+| Health checks | ASP.NET Core | `/health` request duration |
+
+### Implementation pattern
+
+**NuGet package (both APIs):**
+
+```
+Microsoft.ApplicationInsights.AspNetCore
+```
+
+**Registration in `Program.cs`:**
+
+```csharp
+builder.Services.AddApplicationInsightsTelemetry();
+```
+
+**Configuration (App Service application setting):**
+
+```
+APPLICATIONINSIGHTS_CONNECTION_STRING=InstrumentationKey=...;IngestionEndpoint=...
+```
+
+> When creating App Service resources, enable Application Insights in the Azure Portal wizard or link an existing resource. The connection string is injected automatically.
+
+**Structured logging example:**
+
+```csharp
+_logger.LogInformation("Creating task {TaskTitle} for project {ProjectId}", title, projectId);
+```
+
+### Local development
+
+- Telemetry can be disabled locally via `appsettings.Development.json`:
+
+```json
+{
+  "ApplicationInsights": {
+    "EnableAdaptiveSampling": false
+  },
+  "Logging": {
+    "ApplicationInsights": {
+      "LogLevel": {
+        "Default": "Information"
+      }
+    }
+  }
+}
+```
+
+- Leave `APPLICATIONINSIGHTS_CONNECTION_STRING` unset locally to avoid polluting cloud telemetry, or use a separate dev Application Insights resource.
+
 ### Minimum (required)
 
-- ASP.NET Core built-in logging (`ILogger<T>`)
-- App Service log stream in Azure Portal
+- ASP.NET Core built-in logging (`ILogger<T>`) with structured log messages
+- Application Insights connected in Azure for both APIs ([US-019](../user-stories/US-019-application-insights.md))
+- Health check endpoints (`/health`) — see [US-012](../user-stories/US-012-health-checks.md)
+- App Service log stream for quick debugging during deployment
 
-### Recommended (optional)
+### Verification checklist (Week 3)
 
-- [Application Insights](https://learn.microsoft.com/en-us/azure/azure-monitor/app/app-insights-overview) free tier (5 GB/month ingestion)
-- Health check endpoints (`/health`) probed by App Service
+After deploying to Azure and completing US-019:
+
+1. Open Application Insights → **Transaction search** — see API requests after running the demo.
+2. Open **Application map** — see Projects.Api, Tasks.Api, Cosmos DB, and HTTP dependency between services.
+3. Open **Failures** — trigger a 404 and confirm it appears.
+4. Open **Live Metrics** — watch requests in real time during demo.
 
 **Learning resources:**
 
-- [Logging in .NET](https://learn.microsoft.com/en-us/dotnet/core/extensions/logging)
-- [Health checks in ASP.NET Core](https://learn.microsoft.com/en-us/aspnet/core/host-and-deploy/health-checks)
+- [Application Insights overview](https://learn.microsoft.com/en-us/azure/azure-monitor/app/app-insights-overview)
 - [Application Insights for ASP.NET Core](https://learn.microsoft.com/en-us/azure/azure-monitor/app/asp-net-core)
+- [Logging in .NET](https://learn.microsoft.com/en-us/dotnet/core/extensions/logging)
+- [Log in .NET with Application Insights](https://learn.microsoft.com/en-us/azure/azure-monitor/app/asp-net-core#logging-in-aspnet-core-applications)
+- [Application map](https://learn.microsoft.com/en-us/azure/azure-monitor/app/app-map)
+- [Live Metrics](https://learn.microsoft.com/en-us/azure/azure-monitor/app/live-stream)
+- [Health checks in ASP.NET Core](https://learn.microsoft.com/en-us/aspnet/core/host-and-deploy/health-checks)
+- [Monitor App Service with Application Insights](https://learn.microsoft.com/en-us/azure/azure-monitor/app/azure-web-apps-overview)
 
 ---
 

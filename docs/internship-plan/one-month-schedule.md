@@ -44,6 +44,7 @@ gantt
   US-009 to US-011            :w3a, 2026-07-15, 2d
   Azure provisioning          :w3b, after w3a, 1d
   US-012 to US-015 CI/CD      :w3c, after w3b, 2d
+  US-019 App Insights         :w3d, after w3c, 1d
 
   section Week4
   US-013 polish               :w4a, 2026-07-22, 1d
@@ -55,7 +56,7 @@ gantt
 |------|-------|--------------|---------------|
 | 1 | Setup + Projects API start | US-001 – US-003 | Create, list, and get projects locally |
 | 2 | Projects complete + Tasks start | US-004 – US-008 | Both services run locally; create and list tasks |
-| 3 | Tasks complete + cloud + CI/CD | US-009 – US-015 | End-to-end flow works in Azure; CI/CD green |
+| 3 | Tasks complete + cloud + CI/CD + observability | US-009 – US-015, US-019 | End-to-end flow in Azure; CI/CD green; telemetry in App Insights |
 | 4 | Polish + optional + demo | US-016 – US-018 (optional) | Final presentation delivered |
 
 ---
@@ -166,7 +167,8 @@ gantt
 ### Day 13 (Wednesday) — Azure provisioning
 
 - [ ] Provision Azure resources (see [prerequisites checklist](../prerequisites/development-prerequisites.md#azure-resources-checklist))
-- [ ] Configure App Service application settings for both APIs
+- [ ] Create **Application Insights** resource and link to both App Services
+- [ ] Configure App Service application settings for both APIs (Cosmos, `ProjectsApi__BaseUrl`, `APPLICATIONINSIGHTS_CONNECTION_STRING`)
 - [ ] Manual deploy or first CD pipeline test
 - [ ] Verify both APIs respond in Azure
 
@@ -175,14 +177,16 @@ gantt
 - [ ] Implement [US-012](../user-stories/US-012-health-checks.md) in both services
 - [ ] Implement [US-014](../user-stories/US-014-github-actions-ci.md) — CI workflow
 
-### Day 15 (Friday) — US-015 CD pipeline
+### Day 15 (Friday) — US-015 CD pipeline and US-019 observability
 
 - [ ] Implement [US-015](../user-stories/US-015-github-actions-cd.md)
 - [ ] Merge to `main` triggers deployment to both App Services
+- [ ] Implement [US-019](../user-stories/US-019-application-insights.md) — add `Microsoft.ApplicationInsights.AspNetCore`, structured logging
 - [ ] Run [demo script](#minimum-viable-demo-script) against Azure URLs
+- [ ] Verify telemetry in Application Insights (Transaction search, Application map, Live Metrics)
 - [ ] **Checkpoint:** Code review with mentor
 
-**Week 3 deliverable:** Full workflow running in Azure with automated CI/CD.
+**Week 3 deliverable:** Full workflow running in Azure with automated CI/CD and Application Insights telemetry.
 
 ---
 
@@ -255,10 +259,11 @@ Formal reviews at the end of Weeks 1, 2, and 3. Use this checklist:
 
 ### Week 3 review
 
-- [ ] All Must-priority user stories complete (US-001 – US-015)
+- [ ] All Must-priority user stories complete (US-001 – US-015, US-019)
 - [ ] CI pipeline runs on every PR
 - [ ] CD deploys successfully to Azure
 - [ ] Health checks respond
+- [ ] Application Insights receives requests, dependencies, and logs from both APIs
 - [ ] Demo script passes in cloud environment
 
 ---
@@ -287,11 +292,13 @@ Perform this demo during Week 3 review and the final presentation. Replace URLs 
 | 9 | `PATCH {projects-url}/api/v1/projects/{id}/archive` | `200 OK` |
 | 10 | `POST` new task on archived project | `409 Conflict` |
 | 11 | Show GitHub Actions — green CI and CD runs | Workflows passed |
+| 12 | Open Application Insights → run demo again → show Transaction search and Application map | Requests and Cosmos/HTTP dependencies visible |
 
 ### Talking points during demo
 
 - Explain why there are two services and how Tasks validates projects.
 - Show Cosmos DB documents in Azure Portal Data Explorer.
+- Walk through Application Insights: request duration, failed requests, dependency to Projects.Api.
 - Mention free-tier constraints and how you worked around them.
 
 ---
@@ -302,11 +309,12 @@ For mentors — adjust weights as needed.
 
 | Category | Weight | Criteria |
 |----------|--------|----------|
-| **Functionality** | 30% | Must-have user stories (US-001 – US-015) work correctly |
+| **Functionality** | 30% | Must-have user stories (US-001 – US-015, US-019) work correctly |
 | **Code quality** | 20% | Clean structure, naming, separation of concerns |
 | **Testing** | 15% | Unit tests for business logic; CI runs them |
-| **DevOps** | 20% | GitHub Actions CI/CD; successful Azure deployment |
-| **Documentation** | 10% | README, API docs (Swagger), run instructions |
+| **DevOps** | 15% | GitHub Actions CI/CD; successful Azure deployment |
+| **Observability** | 10% | Application Insights telemetry; structured logging; Application map |
+| **Documentation** | 5% | README, API docs (Swagger), run instructions |
 | **Demo and communication** | 5% | Clear presentation, answers questions |
 
 **Bonus (+5%):** Docker support (US-017, US-018) or filter by status (US-016).
