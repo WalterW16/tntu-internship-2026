@@ -142,7 +142,7 @@ Install these when you reach the relevant week or if your mentor recommends them
 |----------|-----------------|---------------|
 | **Cosmos DB Emulator** | Week 1 (Windows) | [Local emulator](https://learn.microsoft.com/en-us/azure/cosmos-db/local-emulator) |
 | **Docker Desktop** | Week 4 (optional) | [Docker Desktop](https://docs.docker.com/desktop/) |
-| **Application Insights** | Week 3 | Configured in Azure Portal — no local install |
+| **Application Insights** | Week 3 | Configured in Azure Portal — [US-019](../user-stories/US-019-application-insights.md) |
 | **FluentAssertions** | Week 1 | NuGet package — [FluentAssertions](https://fluentassertions.com/) |
 
 ---
@@ -241,7 +241,7 @@ Your mentor may provision shared resources. If you provision your own, create th
 | 6 | `asp-tntu-taskboard` | App Service plan | F1 (Free) |
 | 7 | `app-tntu-projects-api` | Web App | F1 |
 | 8 | `app-tntu-tasks-api` | Web App | F1 |
-| 9 | `appi-tntu-taskboard` | Application Insights | Free (optional) |
+| 9 | `appi-tntu-taskboard` | Application Insights | Free (required — [US-019](../user-stories/US-019-application-insights.md)) |
 
 ### Quick-create with Azure CLI (reference)
 
@@ -313,8 +313,9 @@ az webapp create --name app-tntu-tasks-api --resource-group $rg --plan asp-tntu-
 | `CosmosDb__ProjectsContainer` | Projects.Api | `projects` |
 | `CosmosDb__TasksContainer` | Tasks.Api | `tasks` |
 | `ProjectsApi__BaseUrl` | Tasks.Api | `https://app-tntu-projects-api.azurewebsites.net` |
+| `APPLICATIONINSIGHTS_CONNECTION_STRING` | Both | Connection string from Application Insights resource |
 
-> Use double underscore `__` for nested configuration in Azure App Service.
+> Use double underscore `__` for nested configuration in Azure App Service. Application Insights uses the standard `APPLICATIONINSIGHTS_CONNECTION_STRING` name (single underscores).
 
 **Docs:** [ASP.NET Core configuration](https://learn.microsoft.com/en-us/aspnet/core/fundamentals/configuration/)
 
