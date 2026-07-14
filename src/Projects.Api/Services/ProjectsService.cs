@@ -1,5 +1,8 @@
 ﻿using Projects.Api.Data;
 using Projects.Api.Models;
+using FluentResults;
+using Microsoft.EntityFrameworkCore;
+using Projects.Api.Errors;
 
 namespace Projects.Api.Services  {
     public class ProjectsService : IProjectService {
@@ -22,5 +25,22 @@ namespace Projects.Api.Services  {
             Project project = _context.Projects.Find(guid);
             return project;
         }
+        public async Task<Result<Project>> UpdateProjectAsync(Guid id, ProjectRequestDTO projectRequestDTO)
+        {
+            Project project = await _context.Projects.FirstOrDefaultAsync(p => p.id == id);
+           
+            if (project == null) {
+                return Result.Fail(new NotFoundError("Project with given id does not exist"));
+            }           
+            if (project.isArchived) {
+                return Result.Fail(new ConflictError("Can't update archived project"));
+            }
+           project.name = projectRequestDTO.name;
+           project.description = projectRequestDTO.description;
+           await _context.SaveChangesAsync();
+           return Result.Ok(project);                  
+
+        }
+
     }
 }

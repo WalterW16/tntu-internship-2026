@@ -6,6 +6,8 @@ using Projects.Api.Data;
 using Projects.Api.Models;
 using Projects.Api.Services;
 using System.Net.NetworkInformation;
+using FluentResults;
+using Projects.Api.Errors;
 
 [ApiVersion("1.0")]
 [Route("api/v{version:apiVersion}/[controller]")]
@@ -42,7 +44,7 @@ public class ProjectsController : ControllerBase
     [HttpGet("{id}")]
     [ProducesResponseType(typeof(Project), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<Project>> GetProjectById(Guid id) {
         Project project = _service.GetProjectById(id);
         if (project != null) {
@@ -54,4 +56,28 @@ public class ProjectsController : ControllerBase
             Detail = $"Project with ID '{id}' does not exist."
         });                                 
     }
+
+    [HttpPut("{id}")]
+    [ProducesResponseType(typeof(Project), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+
+    public async Task<ActionResult<Project>> PutProject(Guid id, ProjectRequestDTO requestDTO) {
+     
+        var result = await _service.UpdateProjectAsync(id, requestDTO);
+        if (result.HasError<NotFoundError>()) {
+            var error = result.Errors.OfType<NotFoundError>().First();
+            return NotFound(new { message = error.Message });
+        }
+        if (result.HasError<ConflictError>()) {
+            var error = result.Errors.OfType<ConflictError>().First();
+            return Conflict(new {message = error.Message});
+        }
+        if (result.IsSuccess) {
+            return Ok(result.Value);
+        }
+        return StatusCode(500, new { Message = "An unexpected error occurred." });
+    }
+
 }
