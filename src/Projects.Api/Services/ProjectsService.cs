@@ -20,8 +20,8 @@ namespace Projects.Api.Services  {
             List<Project> list = _context.Projects.Where(p => !p.isArchived).OrderByDescending(p => p.createdAt).ToList();
             return Result.Ok(list);
         }
-        public async Task<Result<Project>> GetProjectByIdAsync(Guid guid) {
-            Project project = await _context.Projects.FirstOrDefaultAsync(p => p.id == guid);
+        public async Task<Result<Project>> GetProjectByIdAsync(Guid id) {
+            Project project = await _context.Projects.FirstOrDefaultAsync(p => p.id == id);
             if (project == null) {
                 return Result.Fail(new NotFoundError("Project with given id does not exist"));
             }
@@ -43,6 +43,18 @@ namespace Projects.Api.Services  {
            return Result.Ok(project);                  
 
         }
+        public async Task<Result<Project>> ArchiveProjectAsync(Guid id) {
+            Project project = await _context.Projects.FirstOrDefaultAsync(p => p.id == id);
 
+            if (project == null) {
+                return Result.Fail(new NotFoundError("Project with given id does not exist"));
+            }
+            if (project.isArchived) {
+                return Result.Fail(new ConflictError("Project already archived"));
+            }
+            project.isArchived = true;
+            await _context.SaveChangesAsync();
+            return Result.Ok(project);
+        }
     }
 }
