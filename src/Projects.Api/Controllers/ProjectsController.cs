@@ -1,4 +1,5 @@
 using Asp.Versioning;
+using FluentResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Cosmos;
 using Microsoft.Azure.Cosmos.Serialization.HybridRow;
@@ -117,5 +118,37 @@ public class ProjectsController : ControllerBase
     title: "Internal Server Error"
 );
     }
-
+    [HttpPatch("{id}/archive")]
+    [ProducesResponseType(typeof(Project), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    public async Task<ActionResult<Project>> PatchProject(Guid id) {
+        var result = await _service.ArchiveProjectAsync(id);
+        if (result.HasError<NotFoundError>()) {
+            var error = result.Errors.OfType<NotFoundError>().First();
+            var problem = new ProblemDetails {
+                Status = StatusCodes.Status404NotFound,
+                Title = "Project not found",
+                Detail = error.Message
+            };
+            return NotFound(problem);
+        }
+        if (result.HasError<ConflictError>()) {
+            var error = result.Errors.OfType<ConflictError>().First();
+            var problem = new ProblemDetails {
+                Status = StatusCodes.Status409Conflict,
+                Title = "Conflict",
+                Detail = error.Message
+            };
+            return Conflict(problem);
+        }
+        if (result.IsSuccess) {
+            return Ok(result.Value);
+        }
+        return Problem(
+    detail: "An unexpected error occurred.",
+    statusCode: StatusCodes.Status500InternalServerError,
+    title: "Internal Server Error"
+);
+    }
 }
