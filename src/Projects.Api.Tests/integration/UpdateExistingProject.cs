@@ -58,19 +58,20 @@ namespace Projects.Api.Tests.integration {
             }
 
             Guid nonExistentId = Guid.NewGuid();
-            var requestDto = new ProjectRequestDTO();
-            requestDto.name = "Name";
-            requestDto.description = "Desc";
+            var requestDto = new ProjectRequestDTO {
+                name = "Name",
+                description = "Desc"
+            };
 
             var response = await _client.PutAsJsonAsync($"/api/v1/projects/{nonExistentId}", requestDto);
-
             Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+            var problemDetails = await response.Content.ReadFromJsonAsync<ProblemDetails>();
 
-            var errorResponse = await response.Content.ReadFromJsonAsync<TestErrorMessage>();
-            Assert.NotNull(errorResponse);
-            Assert.NotEmpty(errorResponse.message);
+            Assert.NotNull(problemDetails);
+            Assert.Equal(404, problemDetails.Status);
+            Assert.Equal("Project not found", problemDetails.Title);
+            Assert.NotEmpty(problemDetails.Detail); 
         }
-
         [Fact]
         public async Task PutProject_ProjectIsArchived_ReturnConflict() {
             Project testProject = new Project("Archived Project", "Description") { isArchived = true };
@@ -84,17 +85,20 @@ namespace Projects.Api.Tests.integration {
                 await db.SaveChangesAsync();
             }
 
-            var requestDto = new ProjectRequestDTO();
-            requestDto.name = "Try Update Name";
-            requestDto.description = "Try Update Desc";
-            
+            var requestDto = new ProjectRequestDTO {
+                name = "Try Update Name",
+                description = "Try Update Desc"
+            };
+
             var response = await _client.PutAsJsonAsync($"/api/v1/projects/{testProject.id}", requestDto);
-
             Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
+            
+            var problemDetails = await response.Content.ReadFromJsonAsync<ProblemDetails>();
 
-            var errorResponse = await response.Content.ReadFromJsonAsync<TestErrorMessage>();
-            Assert.NotNull(errorResponse);
-            Assert.NotEmpty(errorResponse.message);
+            Assert.NotNull(problemDetails);
+            Assert.Equal(409, problemDetails.Status);
+            Assert.Equal("Conflict", problemDetails.Title);
+            Assert.NotEmpty(problemDetails.Detail); 
         }
         [Fact]
         public async Task PutProject_EmptyName_ReturnBadRequest() {

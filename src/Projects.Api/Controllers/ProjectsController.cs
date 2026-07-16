@@ -1,5 +1,4 @@
 using Asp.Versioning;
-using FluentResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Cosmos;
 using Microsoft.Azure.Cosmos.Serialization.HybridRow;
@@ -9,6 +8,7 @@ using Projects.Api.Errors;
 using Projects.Api.Models;
 using Projects.Api.Services;
 using System.Net.NetworkInformation;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 [ApiVersion("1.0")]
 [Route("api/v{version:apiVersion}/[controller]")]
@@ -32,20 +32,28 @@ public class ProjectsController : ControllerBase
             return CreatedAtAction(
              nameof(PostProject),
              new { id = result.Value.id },
-             result);
+             result.Value);
         }
-        return StatusCode(500, new { Message = "An unexpected error occurred." });
+        return Problem(
+    detail: "An unexpected error occurred.",
+    statusCode: StatusCodes.Status500InternalServerError,
+    title: "Internal Server Error"
+);
     }
 
     //GET: api/v1/projects
     [HttpGet]
-    [ProducesResponseType(typeof(Project), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(List<Project>), StatusCodes.Status200OK)]
    public async Task<ActionResult<List<Project>>> GetNonArchivedProjects() {
         var result = await _service.GetListOfNonArchivedProjectsAsync();
         if (result.IsSuccess) {
-            return Ok(result);
+            return Ok(result.Value);
         }
-        return StatusCode(500, new { Message = "An unexpected error occurred." });
+        return Problem(
+    detail: "An unexpected error occurred.",
+    statusCode: StatusCodes.Status500InternalServerError,
+    title: "Internal Server Error"
+);
     }
 
     //GET: api/v1/projects{id}
@@ -57,12 +65,21 @@ public class ProjectsController : ControllerBase
         var result = await _service.GetProjectByIdAsync(id);
         if (result.HasError<NotFoundError>()) {
             var error = result.Errors.OfType<NotFoundError>().First();
-            return NotFound(new { message = error.Message });
+            var problem = new ProblemDetails {
+                Status = StatusCodes.Status404NotFound,
+                Title = "Project not found", 
+                Detail = error.Message       
+            };
+            return NotFound(problem);
         }
         if (result.IsSuccess) {
             return Ok(result.Value);
         }
-        return StatusCode(500, new { Message = "An unexpected error occurred." });
+        return Problem(
+    detail: "An unexpected error occurred.",
+    statusCode: StatusCodes.Status500InternalServerError,
+    title: "Internal Server Error"
+);
     }
 
     [HttpPut("{id}")]
@@ -75,16 +92,30 @@ public class ProjectsController : ControllerBase
         var result = await _service.UpdateProjectAsync(id, requestDTO);
         if (result.HasError<NotFoundError>()) {
             var error = result.Errors.OfType<NotFoundError>().First();
-            return NotFound(new { message = error.Message });
+            var problem = new ProblemDetails {
+                Status = StatusCodes.Status404NotFound,
+                Title = "Project not found",
+                Detail = error.Message
+            };
+            return NotFound(problem);
         }
         if (result.HasError<ConflictError>()) {
             var error = result.Errors.OfType<ConflictError>().First();
-            return Conflict(new {message = error.Message});
+            var problem = new ProblemDetails {
+                Status = StatusCodes.Status409Conflict,
+                Title = "Conflict",
+                Detail = error.Message
+            };
+            return Conflict(problem);
         }
         if (result.IsSuccess) {
             return Ok(result.Value);
         }
-        return StatusCode(500, new { Message = "An unexpected error occurred." });
+        return Problem(
+    detail: "An unexpected error occurred.",
+    statusCode: StatusCodes.Status500InternalServerError,
+    title: "Internal Server Error"
+);
     }
 
 }
