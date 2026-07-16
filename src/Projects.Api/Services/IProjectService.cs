@@ -3,10 +3,9 @@ using FluentResults;
 
 namespace Projects.Api.Services {
     public interface IProjectService {
-        public Project CreateProject(ProjectRequestDTO projectRequestDTO);
-        public List<Project> GetListOfNonArchivedProjects();
-        public Project GetProjectById(Guid guid); 
-
+        public Task<Result<Project>> CreateProjectAsync(ProjectRequestDTO projectRequestDTO);
+        public Task<Result<List<Project>>> GetListOfNonArchivedProjectsAsync();
+        public Task<Result<Project>> GetProjectByIdAsync(Guid guid); 
         public Task<Result<Project>> UpdateProjectAsync(Guid id, ProjectRequestDTO projectRequestDTO);
     }
 }

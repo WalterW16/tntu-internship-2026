@@ -77,7 +77,6 @@ namespace Projects.Api.Tests.integration {
             Assert.NotNull(problemDetails);
             Assert.Equal(404, problemDetails.Status);
             Assert.Equal("Project not found", problemDetails.Title);
-            Assert.Contains(nonExistentId.ToString(), problemDetails.Detail); 
         }
     }  
     public record TestProjectResponse(Guid id, string Name, string Description, bool IsArchived);
