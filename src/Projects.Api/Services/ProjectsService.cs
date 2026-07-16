@@ -10,20 +10,22 @@ namespace Projects.Api.Services  {
         public ProjectsService(ProjectContext context) { 
          _context = context;
         }
-        public Project CreateProject(ProjectRequestDTO projectRequestDTO) {
-            Project project = new Project(projectRequestDTO.name, projectRequestDTO.description);     
-            
-            _context.Add(project);
-            _context.SaveChanges();
-            return project;
+        public async Task<Result<Project>> CreateProjectAsync(ProjectRequestDTO projectRequestDTO) { 
+        Project project = new Project(projectRequestDTO.name, projectRequestDTO.description);     
+            await _context.AddAsync(project);
+            await _context.SaveChangesAsync();
+            return Result.Ok(project);
         }
-        public List<Project> GetListOfNonArchivedProjects() {
+        public async Task<Result<List<Project>>> GetListOfNonArchivedProjectsAsync() {
             List<Project> list = _context.Projects.Where(p => !p.isArchived).OrderByDescending(p => p.createdAt).ToList();
-            return list;
+            return Result.Ok(list);
         }
-        public Project GetProjectById(Guid guid) {
-            Project project = _context.Projects.Find(guid);
-            return project;
+        public async Task<Result<Project>> GetProjectByIdAsync(Guid guid) {
+            Project project = await _context.Projects.FirstOrDefaultAsync(p => p.id == guid);
+            if (project == null) {
+                return Result.Fail(new NotFoundError("Project with given id does not exist"));
+            }
+            return Result.Ok(project);
         }
         public async Task<Result<Project>> UpdateProjectAsync(Guid id, ProjectRequestDTO projectRequestDTO)
         {
