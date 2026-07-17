@@ -24,4 +24,4 @@ jobs:
         run: dotnet build src/Projects.Api/Projects.Api.csproj --configuration Release --no-restore
 
       - name: Test
-        run: dotnet test src/Projects.Api.Tests/Projects.Api.Tests.csproj --configuration Release --no-build
+        run: dotnet test src/Projects.Api.Tests/Projects.Api.Tests.csproj --configuration Release 
