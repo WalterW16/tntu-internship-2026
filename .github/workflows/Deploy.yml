@@ -1,0 +1,68 @@
+name: CD
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore
+        run: dotnet restore src/Projects.Api/Projects.Api.csproj
+
+      - name: Build
+        run: dotnet build src/Projects.Api/Projects.Api.csproj --configuration Release --no-restore
+
+      - name: Test
+        run: dotnet test src/Projects.Api.Tests/Projects.Api.Tests.csproj --configuration Release --no-build
+
+      - name: Publish
+        run: dotnet publish src/Projects.Api/Projects.Api.csproj --configuration Release --no-build -o "${{ env.DOTNET_ROOT }}/myapp"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: .net-app
+          path: ${{ env.DOTNET_ROOT }}/myapp
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: .net-app
+          path: publish
+
+      - name: Login to Azure
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_1EF0B0D6AE484439B8708859FF06C76D }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_90A7FED33CEB4A89B1590F35592888D2 }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_FFE8530A02824977A8746C555EE7C8DA }}
+
+      - name: Deploy to Azure Web App
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: app-tntu-projects-api
+          slot-name: Production
+          package: publish
