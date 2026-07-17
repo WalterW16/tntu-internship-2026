@@ -1,0 +1,27 @@
+name: CI
+
+on:
+ pull_request:
+    branches: 
+    - main
+    - develop
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore
+        run: dotnet restore src/Projects.Api/Projects.Api.csproj
+
+      - name: Build
+        run: dotnet build src/Projects.Api/Projects.Api.csproj --configuration Release --no-restore
+
+      - name: Test
+        run: dotnet test src/Projects.Api.Tests/Projects.Api.Tests.csproj --configuration Release 
