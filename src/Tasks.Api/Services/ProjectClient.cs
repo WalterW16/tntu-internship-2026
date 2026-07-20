@@ -1,18 +1,41 @@
-﻿using Tasks.Api.Models;
+﻿using FluentResults;
+using System.Net;
+using Tasks.Api.Errors;
+using Tasks.Api.Models;
+
 namespace Tasks.Api.Services {
-    public class ProjectClient : IProjectClient{
+    public class ProjectClient : IProjectClient {
         private readonly HttpClient _httpClient;
+
         public ProjectClient(HttpClient httpClient) {
             _httpClient = httpClient;
         }
-        public async Task<ProjectDto> GetProjectByIdAsync(Guid projectId, CancellationToken cancellationToken) {
-            var response = await _httpClient.GetAsync($"/api/projects/{projectId}", cancellationToken);
+        public async Task<Result<ProjectDTO>> GetProjectByIdAsync(Guid projectId) {
+            try {
+                var response = await _httpClient.GetAsync($"/api/v1/projects/{projectId}");
 
-            if (response.StatusCode == System.Net.HttpStatusCode.NotFound) {
-                return null; 
+                if (response.StatusCode == System.Net.HttpStatusCode.NotFound) {
+                    return Result.Fail(new NotFoundError("Project with given id does not exist"));
+                }
+
+                // ДОДАНО: Перевірка інших неуспішних статусів
+                if (!response.IsSuccessStatusCode) {
+                    return Result.Fail($"Projects API returned an error: {response.StatusCode}");
+                }
+
+                // ДОДАНО: Захист від NullReferenceException, якщо відповідь порожня (204 No Content)
+                var data = await response.Content.ReadFromJsonAsync<ProjectDTO>();
+                if (data == null) {
+                    return Result.Fail("Failed to deserialize Project API response.");
+                }
+
+                return Result.Ok(data);
+            } catch (HttpRequestException) {
+                return Result.Fail(new BadGatewayError("Projects API is unavailable."));
+            } catch (Exception ex) {
+                // Перехоплюємо всі інші помилки (наприклад, JsonException)
+                return Result.Fail($"Unexpected error: {ex.Message}");
             }
-            response.EnsureSuccessStatusCode(); 
-            return await response.Content.ReadFromJsonAsync<ProjectDto>(cancellationToken: cancellationToken);
         }
     }
 }
