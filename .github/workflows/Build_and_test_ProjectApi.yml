@@ -1,10 +1,13 @@
-name: CI
+name: CI-Projects.Api
 
 on:
  pull_request:
     branches: 
     - main
     - develop
+    paths:
+    - 'src/Projects.Api/**' 
+    - 'src/Projects.Api.Tests/**'
 
 jobs:
   test:
