@@ -33,5 +33,21 @@ namespace Tasks.Api.Services {
             return Result.Ok(createdTask);
         }
 
+        public async Task<Result<List<TaskItem>>> GetListOfTasksForProjectAsync(Guid projectId) {
+            var projectClientRequestResult = await _projectsApiClient.GetProjectByIdAsync(projectId);
+
+            if (projectClientRequestResult.HasError<NotFoundError>()) {
+                return projectClientRequestResult.Errors.OfType<NotFoundError>().First();
+            }
+            if (projectClientRequestResult.HasError<BadGatewayError>()) {
+                return projectClientRequestResult.Errors.OfType<BadGatewayError>().First();
+            }
+            if (projectClientRequestResult.IsFailed) {
+                return Result.Fail(projectClientRequestResult.Errors.First());
+            }
+            List<TaskItem> list = _context.TaskItems.Where(p => p.projectId == projectId).OrderByDescending(p => p.createdAt).ToList();
+            return Result.Ok(list);
+        }
+
     }
 }
