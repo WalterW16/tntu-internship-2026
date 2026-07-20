@@ -1,7 +1,8 @@
-﻿using Tasks.Api.Models;
+﻿using FluentResults;
+using Tasks.Api.Models;
 
 namespace Tasks.Api.Services {
     public interface IProjectClient {
-        public Task<ProjectDto> GetProjectByIdAsync(Guid projectId, CancellationToken cancellationToken);
+        public Task<Result<ProjectDTO>> GetProjectByIdAsync(Guid projectId);
     }
 }

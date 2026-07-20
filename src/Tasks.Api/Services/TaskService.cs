@@ -1,8 +1,37 @@
-﻿namespace Tasks.Api.Services {
+﻿using FluentResults;
+using Tasks.Api.Data;
+using Tasks.Api.Errors;
+using Tasks.Api.Models;
+using static System.Runtime.InteropServices.JavaScript.JSType;
+
+namespace Tasks.Api.Services {
     public class TaskService : ITaskService {
         private readonly IProjectClient _projectsApiClient;
-        public TaskService(IProjectClient projectClient) { 
-        this._projectsApiClient = projectClient;
+        private readonly TaskContext _context;
+        public TaskService(IProjectClient projectClient, TaskContext context) { 
+        _context = context;
+        _projectsApiClient = projectClient;
         }
+        public async Task<Result<TaskItem>> CreateTaskInProjectAsync(Guid projectId, TaskItemRequestDTO requestDTO) {
+            var projectClientRequestResult = await _projectsApiClient.GetProjectByIdAsync(projectId);
+            if (projectClientRequestResult.HasError<NotFoundError>()) {
+                return projectClientRequestResult.Errors.OfType<NotFoundError>().First();
+            }
+            if (projectClientRequestResult.HasError<BadGatewayError>()) {
+                return projectClientRequestResult.Errors.OfType<BadGatewayError>().First();
+            }
+            if (projectClientRequestResult.IsFailed) {
+                return Result.Fail(projectClientRequestResult.Errors.First());
+            }
+            ProjectDTO projectDto = projectClientRequestResult.Value;
+            if (projectDto.isArchived) {
+                return Result.Fail(new ConflictError("Can't create task in archived project"));
+            }
+            TaskItem createdTask = new TaskItem( projectDto.id, requestDTO.title,  requestDTO.description, requestDTO.assignee, requestDTO.dueDate);
+            await _context.AddAsync(createdTask);
+            await _context.SaveChangesAsync();
+            return Result.Ok(createdTask);
+        }
+
     }
 }

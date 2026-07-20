@@ -1,6 +1,7 @@
+using Asp.Versioning;
 using Microsoft.EntityFrameworkCore;
-using Tasks.Api.Services;
 using Tasks.Api.Data;
+using Tasks.Api.Services;
 var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("TaskContext") ?? throw new InvalidOperationException("Connection string 'TaskContext' not found.");
 var cosmosEndpoint = builder.Configuration["CosmosDb:Endpoint"];
@@ -23,6 +24,20 @@ builder.Services.AddHttpClient<IProjectClient, ProjectClient>(client => {
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddRouting(options => options.LowercaseUrls = true);
 builder.Services.AddSwaggerGen();
+builder.Services.AddApiVersioning(options => {
+    options.DefaultApiVersion = new ApiVersion(1);
+    options.ReportApiVersions = true;
+    options.AssumeDefaultVersionWhenUnspecified = true;
+    options.ApiVersionReader = ApiVersionReader.Combine(
+        new UrlSegmentApiVersionReader(),
+        new HeaderApiVersionReader("Projects-Api-Version"));
+})
+.AddMvc() // This is needed for controllers
+.AddApiExplorer(options => {
+    options.GroupNameFormat = "'v'V";
+    options.SubstituteApiVersionInUrl = true;
+});
+
 
 var app = builder.Build();
 
