@@ -11,9 +11,9 @@ namespace Tasks.Api.Controllers {
     [Route("api/v{version:apiVersion}/projects")]
     [ApiController]
     public class TasksController : ControllerBase {
-       private readonly ITaskService _service;
-        public TasksController(ITaskService taskService) { 
-        _service = taskService;
+        private readonly ITaskService _service;
+        public TasksController(ITaskService taskService) {
+            _service = taskService;
         }
         [HttpPost("{projectId}/tasks")]
         [ProducesResponseType(typeof(TaskItem), StatusCodes.Status201Created)]
@@ -27,7 +27,7 @@ namespace Tasks.Api.Controllers {
                 var error = result.Errors.OfType<NotFoundError>().First();
                 var problem = new ProblemDetails {
                     Status = StatusCodes.Status404NotFound,
-                    Title = "Project not found",
+                    Title = "Resource not found",
                     Detail = error.Message
                 };
                 return NotFound(problem);
@@ -71,7 +71,7 @@ namespace Tasks.Api.Controllers {
                 var error = result.Errors.OfType<NotFoundError>().First();
                 var problem = new ProblemDetails {
                     Status = StatusCodes.Status404NotFound,
-                    Title = "Project not found",
+                    Title = "Resource not found",
                     Detail = error.Message
                 };
                 return NotFound(problem);
@@ -94,5 +94,39 @@ namespace Tasks.Api.Controllers {
             title: "Internal Server Error"
             );
         }
+        ///api/v1/projects/{projectId}/tasks/{taskId
+        [HttpGet("{projectId}/tasks/{taskid}")]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(TaskItem), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status502BadGateway)]
+        public async Task<ActionResult<TaskItem>> GetTaskByIdInProject(Guid projectId, Guid taskid) {
+            var result = await _service.GetTaskByIdInProjectAsync(projectId, taskid);
+            if (result.HasError<NotFoundError>()) {
+                var error = result.Errors.OfType<NotFoundError>().First();
+                var problem = new ProblemDetails {
+                    Status = StatusCodes.Status404NotFound,
+                    Title = "Resource not found",
+                    Detail = error.Message
+                };
+                return NotFound(problem);
+            }
+            if (result.HasError<BadGatewayError>()) {
+                var error = result.Errors.OfType<BadGatewayError>().First();
+                var problem = new ProblemDetails {
+                    Status = StatusCodes.Status502BadGateway,
+                    Title = "BadGateway",
+                    Detail = error.Message
+                };
+                return StatusCode(StatusCodes.Status502BadGateway, problem);
+            }
+            if (result.IsSuccess) {
+                return Ok(result.Value);
+            }
+            return Problem(
+            detail: "An unexpected error occurred.",
+            statusCode: StatusCodes.Status500InternalServerError,
+            title: "Internal Server Error"
+            );
         }
     }
+}
