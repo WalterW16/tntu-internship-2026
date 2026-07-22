@@ -3,7 +3,6 @@ using Microsoft.EntityFrameworkCore;
 using Tasks.Api.Data;
 using Tasks.Api.Services;
 var builder = WebApplication.CreateBuilder(args);
-var connectionString = builder.Configuration.GetConnectionString("TaskContext") ?? throw new InvalidOperationException("Connection string 'TaskContext' not found.");
 var cosmosEndpoint = builder.Configuration["CosmosDb:Endpoint"];
 var cosmosKey = builder.Configuration["CosmosDb:Key"];
 var databaseName = builder.Configuration["CosmosDb:DatabaseName"];
@@ -58,3 +57,5 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
+public partial class Program { }
