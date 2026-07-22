@@ -10,7 +10,7 @@ namespace Tasks.Api.Models {
         [StringLength(500, MinimumLength = 0)]
         public string? description { get; set; }
 
-        [StringLength(200, MinimumLength = 1)]
+        [StringLength(200, MinimumLength = 0)]
         public string? assignee {  get; set; }
         public DateTimeOffset? dueDate { get; set; }
     }
