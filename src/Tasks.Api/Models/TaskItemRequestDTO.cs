@@ -7,7 +7,7 @@ namespace Tasks.Api.Models {
         [StringLength(200, MinimumLength = 1)]
         public string title {  get; set; }
 
-        [StringLength(500, MinimumLength = 0)]
+        [StringLength(2000, MinimumLength = 0)]
         public string? description { get; set; }
 
         [StringLength(200, MinimumLength = 0)]

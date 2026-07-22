@@ -84,9 +84,15 @@ namespace Tasks.Api.Services {
                 return Result.Fail(new NotFoundError("No task with specified id"));
             }
             task.title = dro.title;
-            task.description = dro.description;
-            task.assignee = dro.assignee;
-            task.dueDate = dro.dueDate;
+            if (dro.description != null) {
+                task.description = dro.description;
+            }
+            if (dro.assignee != null) {
+                task.assignee = dro.assignee;
+            }
+            if (dro.dueDate.HasValue) {
+                task.dueDate = dro.dueDate;
+            }
             await _context.SaveChangesAsync();
             return Result.Ok(task);
         }
