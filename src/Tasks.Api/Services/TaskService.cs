@@ -67,5 +67,70 @@ namespace Tasks.Api.Services {
             }
             return Result.Ok(task);
         }
+        public async Task<Result<TaskItem>> UpdateTaskDetailsAsync(Guid projectId, Guid taskId, TaskItemRequestDTO dro) {
+            var projectClientRequestResult = await _projectsApiClient.GetProjectByIdAsync(projectId);
+
+            if (projectClientRequestResult.HasError<NotFoundError>()) {
+                return projectClientRequestResult.Errors.OfType<NotFoundError>().First();
+            }
+            if (projectClientRequestResult.HasError<BadGatewayError>()) {
+                return projectClientRequestResult.Errors.OfType<BadGatewayError>().First();
+            }
+            if (projectClientRequestResult.IsFailed) {
+                return Result.Fail(projectClientRequestResult.Errors.First());
+            }
+            TaskItem task = await _context.TaskItems.FirstOrDefaultAsync(t => t.projectId == projectId && t.id == taskId);
+            if (task == null) {
+                return Result.Fail(new NotFoundError("No task with specified id"));
+            }
+            task.title = dro.title;
+            task.description = dro.description;
+            task.assignee = dro.assignee;
+            task.dueDate = dro.dueDate;
+            task.updatedAt= DateTimeOffset.UtcNow;
+            await _context.SaveChangesAsync();
+            return Result.Ok(task);
+        }
+        public async Task<Result<TaskItem>> ChangeTaskItemStatusAsync(Guid projectId, Guid taskId, TaskItemStatus status) {
+              var projectClientRequestResult = await _projectsApiClient.GetProjectByIdAsync(projectId);
+
+            if (projectClientRequestResult.HasError<NotFoundError>()) {
+                return projectClientRequestResult.Errors.OfType<NotFoundError>().First();
+            }
+            if (projectClientRequestResult.HasError<BadGatewayError>()) {
+                return projectClientRequestResult.Errors.OfType<BadGatewayError>().First();
+            }
+            if (projectClientRequestResult.IsFailed) {
+                return Result.Fail(projectClientRequestResult.Errors.First());
+            }           
+            TaskItem task = await _context.TaskItems.FirstOrDefaultAsync(t => t.projectId == projectId && t.id == taskId);
+            if (task == null) {
+                return Result.Fail(new NotFoundError("No task with specified id"));
+            }
+            bool isChanged = task.SetStatus(status);
+            if (!isChanged) {
+                return Result.Fail(new ConflictError($"Can't change status from '{task.status}' to '{status}'"));
+            }
+            task.updatedAt = DateTime.UtcNow;
+            await _context.SaveChangesAsync();
+            return Result.Ok(task);
+        }
+        public async Task<Result> DeleteTaskAsync(Guid projectId, Guid taskId) {
+            var projectClientRequestResult = await _projectsApiClient.GetProjectByIdAsync(projectId);
+
+            if (projectClientRequestResult.HasError<NotFoundError>()) {
+                return projectClientRequestResult.Errors.OfType<NotFoundError>().First();
+            }
+            if (projectClientRequestResult.HasError<BadGatewayError>()) {
+                return projectClientRequestResult.Errors.OfType<BadGatewayError>().First();
+            }
+            TaskItem task = await _context.TaskItems.FirstOrDefaultAsync(t => t.projectId == projectId && t.id == taskId);
+            if (task == null) {
+                return Result.Fail(new NotFoundError("No task with specified id"));
+            }
+            _context.TaskItems.Remove(task);
+            await _context.SaveChangesAsync();
+            return Result.Ok();
+        }
     }
 }
