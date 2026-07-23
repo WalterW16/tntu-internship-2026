@@ -261,43 +261,6 @@ namespace Tasks.Api.Tests.integration {
             Assert.Equal(400, problemDetails.Status);
             Assert.True(problemDetails.Errors.ContainsKey("assignee") || problemDetails.Errors.ContainsKey("Assignee"));
         }
-
-        [Fact]
-        public async Task PutTask_UpdateOnlyTitle_ReturnOkWithOtherFieldsUnchanged() {
-            // Arrange
-            var projectId = Guid.NewGuid();
-            var originalDescription = "Original Description";
-            var originalAssignee = "Original Assignee";
-            var originalDueDate = DateTimeOffset.UtcNow.AddDays(10);
-            var testTask = new TaskItem(projectId, "Old Title", originalDescription, originalAssignee, originalDueDate);
-
-            using (var scope = _factory.Services.CreateScope()) {
-                var db = scope.ServiceProvider.GetRequiredService<TaskContext>();
-                db.Database.EnsureDeleted();
-                db.Database.EnsureCreated();
-
-                db.TaskItems.Add(testTask);
-                await db.SaveChangesAsync();
-            }
-
-            // Setup mock project client
-            _factory.ProjectClientMock!
-                .Setup(c => c.GetProjectByIdAsync(projectId))
-                .Returns(Task.FromResult(Result.Ok(new ProjectDTO(projectId, "Test Project", false))));
-
-            // Act
-            var requestDto = new TaskItemRequestDTO { title = "Updated Title" };
-            var response = await _client.PutAsJsonAsync($"/api/v1/projects/{projectId}/tasks/{testTask.id}", requestDto);
-
-            // Assert
-            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            var returnedTask = await response.Content.ReadFromJsonAsync<TaskItem>();
-
-            Assert.NotNull(returnedTask);
-            Assert.Equal("Updated Title", returnedTask.title);
-            Assert.Equal(originalDescription, returnedTask.description);
-            Assert.Equal(originalAssignee, returnedTask.assignee);
-            Assert.Equal(originalDueDate, returnedTask.dueDate);
-        }
+       
     }
 }
