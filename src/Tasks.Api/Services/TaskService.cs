@@ -87,6 +87,7 @@ namespace Tasks.Api.Services {
             task.description = dro.description;
             task.assignee = dro.assignee;
             task.dueDate = dro.dueDate;
+            task.updatedAt= DateTimeOffset.UtcNow;
             await _context.SaveChangesAsync();
             return Result.Ok(task);
         }
