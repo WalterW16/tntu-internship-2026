@@ -67,7 +67,7 @@ namespace Tasks.Api.Services {
             }
             return Result.Ok(task);
         }
-        public async Task<Result<TaskItem>> UpdateTaskDetails(Guid projectId, Guid taskId, TaskItemRequestDTO dro) {
+        public async Task<Result<TaskItem>> UpdateTaskDetailsAsync(Guid projectId, Guid taskId, TaskItemRequestDTO dro) {
             var projectClientRequestResult = await _projectsApiClient.GetProjectByIdAsync(projectId);
 
             if (projectClientRequestResult.HasError<NotFoundError>()) {
@@ -91,7 +91,7 @@ namespace Tasks.Api.Services {
             await _context.SaveChangesAsync();
             return Result.Ok(task);
         }
-        public async Task<Result<TaskItem>> ChangeTaskItemStatus(Guid projectId, Guid taskId, TaskItemStatus status) {
+        public async Task<Result<TaskItem>> ChangeTaskItemStatusAsync(Guid projectId, Guid taskId, TaskItemStatus status) {
               var projectClientRequestResult = await _projectsApiClient.GetProjectByIdAsync(projectId);
 
             if (projectClientRequestResult.HasError<NotFoundError>()) {
@@ -115,7 +115,7 @@ namespace Tasks.Api.Services {
             await _context.SaveChangesAsync();
             return Result.Ok(task);
         }
-        public async Task<Result> DeleteTask(Guid projectId, Guid taskId) {
+        public async Task<Result> DeleteTaskAsync(Guid projectId, Guid taskId) {
             var projectClientRequestResult = await _projectsApiClient.GetProjectByIdAsync(projectId);
 
             if (projectClientRequestResult.HasError<NotFoundError>()) {

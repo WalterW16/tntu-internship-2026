@@ -136,7 +136,7 @@ namespace Tasks.Api.Controllers {
         [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status502BadGateway)]
         public async Task<ActionResult<TaskItem>> PutTask(Guid projectId, Guid taskId, TaskItemRequestDTO dto) {
-            var result = await _service.UpdateTaskDetails(projectId, taskId, dto);
+            var result = await _service.UpdateTaskDetailsAsync(projectId, taskId, dto);
             if (result.HasError<NotFoundError>()) {
                 var error = result.Errors.OfType<NotFoundError>().First();
                 var problem = new ProblemDetails {
@@ -171,7 +171,7 @@ namespace Tasks.Api.Controllers {
         [ProducesResponseType(StatusCodes.Status409Conflict)]
         [ProducesResponseType(StatusCodes.Status502BadGateway)]
         public async Task<ActionResult<TaskItem>> PatchTask(Guid projectId, Guid taskId, [FromBody] UpdateTaskStatusRequest status) {
-            var result = await _service.ChangeTaskItemStatus(projectId, taskId, status.Status);
+            var result = await _service.ChangeTaskItemStatusAsync(projectId, taskId, status.Status);
             if (result.HasError<NotFoundError>()) {
                 var error = result.Errors.OfType<NotFoundError>().First();
                 var problem = new ProblemDetails {
@@ -214,7 +214,7 @@ namespace Tasks.Api.Controllers {
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status502BadGateway)]
         public async Task<ActionResult> DeleteTask(Guid projectId, Guid taskId) {
-            var result = await _service.DeleteTask(projectId, taskId);
+            var result = await _service.DeleteTaskAsync(projectId, taskId);
             if (result.HasError<NotFoundError>()) {
                 var error = result.Errors.OfType<NotFoundError>().First();
                 var problem = new ProblemDetails {

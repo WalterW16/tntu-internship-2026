@@ -19,7 +19,7 @@ namespace Tasks.Api.Tests.unit {
         // --- Тести перевірки API проектів та наявності завдання ---
 
         [Fact]
-        public async Task ChangeTaskItemStatus_WhenProjectNotFound_ReturnsNotFoundError() {
+        public async Task ChangeTaskItemStatusAsync_WhenProjectNotFound_ReturnsNotFoundError() {
             // Arrange
             var projectId = Guid.NewGuid();
             var taskId = Guid.NewGuid();
@@ -33,7 +33,7 @@ namespace Tasks.Api.Tests.unit {
             var service = new TaskService(mockProjectClient.Object, context);
 
             // Act
-            var result = await service.ChangeTaskItemStatus(projectId, taskId, TaskItemStatus.InProgress);
+            var result = await service.ChangeTaskItemStatusAsync(projectId, taskId, TaskItemStatus.InProgress);
 
             // Assert
             Assert.True(result.IsFailed);
@@ -41,7 +41,7 @@ namespace Tasks.Api.Tests.unit {
         }
 
         [Fact]
-        public async Task ChangeTaskItemStatus_WhenProjectsApiUnavailable_ReturnsBadGatewayError() {
+        public async Task ChangeTaskItemStatusAsync_WhenProjectsApiUnavailable_ReturnsBadGatewayError() {
             // Arrange
             var projectId = Guid.NewGuid();
             var taskId = Guid.NewGuid();
@@ -55,7 +55,7 @@ namespace Tasks.Api.Tests.unit {
             var service = new TaskService(mockProjectClient.Object, context);
 
             // Act
-            var result = await service.ChangeTaskItemStatus(projectId, taskId, TaskItemStatus.InProgress);
+            var result = await service.ChangeTaskItemStatusAsync(projectId, taskId, TaskItemStatus.InProgress);
 
             // Assert
             Assert.True(result.IsFailed);
@@ -63,7 +63,7 @@ namespace Tasks.Api.Tests.unit {
         }
 
         [Fact]
-        public async Task ChangeTaskItemStatus_WhenTaskDoesNotExist_ReturnsNotFoundError() {
+        public async Task ChangeTaskItemStatusAsync_WhenTaskDoesNotExist_ReturnsNotFoundError() {
             // Arrange
             var projectId = Guid.NewGuid();
             var taskId = Guid.NewGuid();
@@ -78,7 +78,7 @@ namespace Tasks.Api.Tests.unit {
             var service = new TaskService(mockProjectClient.Object, context);
 
             // Act
-            var result = await service.ChangeTaskItemStatus(projectId, taskId, TaskItemStatus.InProgress);
+            var result = await service.ChangeTaskItemStatusAsync(projectId, taskId, TaskItemStatus.InProgress);
 
             // Assert
             Assert.True(result.IsFailed);
@@ -89,7 +89,7 @@ namespace Tasks.Api.Tests.unit {
         // --- Тести дозволених переходів статусів (Happy Path) ---
 
         [Fact]
-        public async Task ChangeTaskItemStatus_FromToDoToInProgress_ReturnsOkAndUpdatesTask() {
+        public async Task ChangeTaskItemStatusAsync_FromToDoToInProgress_ReturnsOkAndUpdatesTask() {
             // Arrange
             var projectId = Guid.NewGuid();
             var activeProject = new ProjectDTO(projectId, "title", false);
@@ -112,7 +112,7 @@ namespace Tasks.Api.Tests.unit {
             var service = new TaskService(mockProjectClient.Object, context);
 
             // Act
-            var result = await service.ChangeTaskItemStatus(projectId, taskId, TaskItemStatus.InProgress);
+            var result = await service.ChangeTaskItemStatusAsync(projectId, taskId, TaskItemStatus.InProgress);
 
             // Assert
             Assert.True(result.IsSuccess);
@@ -121,7 +121,7 @@ namespace Tasks.Api.Tests.unit {
         }
 
         [Fact]
-        public async Task ChangeTaskItemStatus_FromInProgressToDone_ReturnsOkAndUpdatesTask() {
+        public async Task ChangeTaskItemStatusAsync_FromInProgressToDone_ReturnsOkAndUpdatesTask() {
             // Arrange
             var projectId = Guid.NewGuid();
             var activeProject = new ProjectDTO(projectId, "title", false);
@@ -143,7 +143,7 @@ namespace Tasks.Api.Tests.unit {
             var service = new TaskService(mockProjectClient.Object, context);
 
             // Act
-            var result = await service.ChangeTaskItemStatus(projectId, taskId, TaskItemStatus.Done);
+            var result = await service.ChangeTaskItemStatusAsync(projectId, taskId, TaskItemStatus.Done);
 
             // Assert
             Assert.True(result.IsSuccess);
@@ -154,7 +154,7 @@ namespace Tasks.Api.Tests.unit {
         // --- Тести заборонених переходів статусів (Conflict) ---
 
         [Fact]
-        public async Task ChangeTaskItemStatus_FromToDoToDone_ReturnsConflictError() {
+        public async Task ChangeTaskItemStatusAsync_FromToDoToDone_ReturnsConflictError() {
             // Arrange
             var projectId = Guid.NewGuid();
             var activeProject = new ProjectDTO(projectId, "title", false);
@@ -174,7 +174,7 @@ namespace Tasks.Api.Tests.unit {
             var service = new TaskService(mockProjectClient.Object, context);
 
             // Act
-            var result = await service.ChangeTaskItemStatus(projectId, taskId, TaskItemStatus.Done);
+            var result = await service.ChangeTaskItemStatusAsync(projectId, taskId, TaskItemStatus.Done);
 
             // Assert
             Assert.True(result.IsFailed);
@@ -183,7 +183,7 @@ namespace Tasks.Api.Tests.unit {
         }
 
         [Fact]
-        public async Task ChangeTaskItemStatus_FromInProgressToToDo_ReturnsConflictError() {
+        public async Task ChangeTaskItemStatusAsync_FromInProgressToToDo_ReturnsConflictError() {
             // Arrange
             var projectId = Guid.NewGuid();
             var activeProject = new ProjectDTO(projectId, "title", false);
@@ -204,7 +204,7 @@ namespace Tasks.Api.Tests.unit {
             var service = new TaskService(mockProjectClient.Object, context);
 
             // Act
-            var result = await service.ChangeTaskItemStatus(projectId, taskId, TaskItemStatus.ToDo);
+            var result = await service.ChangeTaskItemStatusAsync(projectId, taskId, TaskItemStatus.ToDo);
 
             // Assert
             Assert.True(result.IsFailed);
@@ -214,7 +214,7 @@ namespace Tasks.Api.Tests.unit {
         [Theory]
         [InlineData(TaskItemStatus.ToDo)]
         [InlineData(TaskItemStatus.InProgress)]
-        public async Task ChangeTaskItemStatus_FromDoneToAnyStatus_ReturnsConflictError(TaskItemStatus targetStatus) {
+        public async Task ChangeTaskItemStatusAsync_FromDoneToAnyStatus_ReturnsConflictError(TaskItemStatus targetStatus) {
             // Arrange
             var projectId = Guid.NewGuid();
             var activeProject = new ProjectDTO(projectId, "title", false);
@@ -236,7 +236,7 @@ namespace Tasks.Api.Tests.unit {
             var service = new TaskService(mockProjectClient.Object, context);
 
             // Act
-            var result = await service.ChangeTaskItemStatus(projectId, taskId, targetStatus);
+            var result = await service.ChangeTaskItemStatusAsync(projectId, taskId, targetStatus);
 
             // Assert
             Assert.True(result.IsFailed);

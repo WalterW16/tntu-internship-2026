@@ -17,7 +17,7 @@ namespace Tasks.Api.Tests.unit {
         }
 
         [Fact]
-        public async Task UpdateTaskDetails_WhenProjectNotFound_ReturnsNotFoundError() {
+        public async Task UpdateTaskDetailsAsync_WhenProjectNotFound_ReturnsNotFoundError() {
             // Arrange
             var projectId = Guid.NewGuid();
             var taskId = Guid.NewGuid();
@@ -32,7 +32,7 @@ namespace Tasks.Api.Tests.unit {
             var service = new TaskService(mockProjectClient.Object, context);
 
             // Act
-            var result = await service.UpdateTaskDetails(projectId, taskId, requestDto);
+            var result = await service.UpdateTaskDetailsAsync(projectId, taskId, requestDto);
 
             // Assert
             Assert.True(result.IsFailed);
@@ -40,7 +40,7 @@ namespace Tasks.Api.Tests.unit {
         }
 
         [Fact]
-        public async Task UpdateTaskDetails_WhenProjectsApiUnavailable_ReturnsBadGatewayError() {
+        public async Task UpdateTaskDetailsAsync_WhenProjectsApiUnavailable_ReturnsBadGatewayError() {
             // Arrange
             var projectId = Guid.NewGuid();
             var taskId = Guid.NewGuid();
@@ -55,7 +55,7 @@ namespace Tasks.Api.Tests.unit {
             var service = new TaskService(mockProjectClient.Object, context);
 
             // Act
-            var result = await service.UpdateTaskDetails(projectId, taskId, requestDto);
+            var result = await service.UpdateTaskDetailsAsync(projectId, taskId, requestDto);
 
             // Assert
             Assert.True(result.IsFailed);
@@ -63,7 +63,7 @@ namespace Tasks.Api.Tests.unit {
         }
 
         [Fact]
-        public async Task UpdateTaskDetails_WhenTaskDoesNotExist_ReturnsNotFoundError() {
+        public async Task UpdateTaskDetailsAsync_WhenTaskDoesNotExist_ReturnsNotFoundError() {
             // Arrange
             var projectId = Guid.NewGuid();
             var taskId = Guid.NewGuid();
@@ -79,7 +79,7 @@ namespace Tasks.Api.Tests.unit {
             var service = new TaskService(mockProjectClient.Object, context);
 
             // Act
-            var result = await service.UpdateTaskDetails(projectId, taskId, requestDto);
+            var result = await service.UpdateTaskDetailsAsync(projectId, taskId, requestDto);
 
             // Assert
             Assert.True(result.IsFailed);
@@ -88,7 +88,7 @@ namespace Tasks.Api.Tests.unit {
         }
 
         [Fact]
-        public async Task UpdateTaskDetails_WhenTaskExistsAndProjectIsValid_UpdatesTaskAndReturnsOk() {
+        public async Task UpdateTaskDetailsAsync_WhenTaskExistsAndProjectIsValid_UpdatesTaskAndReturnsOk() {
             // Arrange
             var projectId = Guid.NewGuid();
             var activeProject = new ProjectDTO(projectId, "title", false);
@@ -118,7 +118,7 @@ namespace Tasks.Api.Tests.unit {
             };
 
             // Act
-            var result = await service.UpdateTaskDetails(projectId, taskId, requestDto);
+            var result = await service.UpdateTaskDetailsAsync(projectId, taskId, requestDto);
 
             // Assert
             Assert.True(result.IsSuccess);
@@ -136,7 +136,7 @@ namespace Tasks.Api.Tests.unit {
        
         
         [Fact]
-        public async Task UpdateTaskDetails_DoesNotChangeStatusOrProjectId() {
+        public async Task UpdateTaskDetailsAsync_DoesNotChangeStatusOrProjectId() {
             // Arrange
             var projectId = Guid.NewGuid();
             var activeProject = new ProjectDTO(projectId, "title", false);
@@ -166,7 +166,7 @@ namespace Tasks.Api.Tests.unit {
             };
 
             // Act
-            var result = await service.UpdateTaskDetails(projectId, taskId, requestDto);
+            var result = await service.UpdateTaskDetailsAsync(projectId, taskId, requestDto);
 
             // Assert
             Assert.True(result.IsSuccess);
@@ -177,7 +177,7 @@ namespace Tasks.Api.Tests.unit {
         }
 
         [Fact]
-        public async Task UpdateTaskDetails_UpdatesTimestampInDatabase() {
+        public async Task UpdateTaskDetailsAsync_UpdatesTimestampInDatabase() {
             // Arrange
             var projectId = Guid.NewGuid();
             var activeProject = new ProjectDTO(projectId, "title", false);
@@ -201,7 +201,7 @@ namespace Tasks.Api.Tests.unit {
             var requestDto = new TaskItemRequestDTO { title = "Updated Title" };
 
             // Act
-            var result = await service.UpdateTaskDetails(projectId, taskId, requestDto);
+            var result = await service.UpdateTaskDetailsAsync(projectId, taskId, requestDto);
 
             // Assert
             Assert.True(result.IsSuccess);
@@ -215,7 +215,7 @@ namespace Tasks.Api.Tests.unit {
         }
 
         [Fact]
-        public async Task UpdateTaskDetails_WhenTaskBelongsToDifferentProject_ReturnsNotFoundError() {
+        public async Task UpdateTaskDetailsAsync_WhenTaskBelongsToDifferentProject_ReturnsNotFoundError() {
             // Arrange
             var projectId1 = Guid.NewGuid();
             var projectId2 = Guid.NewGuid();
@@ -239,7 +239,7 @@ namespace Tasks.Api.Tests.unit {
             var requestDto = new TaskItemRequestDTO { title = "Updated Title" };
 
             // Act
-            var result = await service.UpdateTaskDetails(projectId1, taskId, requestDto);
+            var result = await service.UpdateTaskDetailsAsync(projectId1, taskId, requestDto);
 
             // Assert
             Assert.True(result.IsFailed);
