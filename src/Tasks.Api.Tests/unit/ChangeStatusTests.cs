@@ -1,4 +1,4 @@
-using FluentResults;
+﻿using FluentResults;
 using Microsoft.EntityFrameworkCore;
 using Moq;
 using Tasks.Api.Data;
@@ -8,7 +8,7 @@ using Tasks.Api.Services;
 using Xunit;
 
 namespace Tasks.Api.Tests.unit {
-    public class UpdateTaskTests {
+    public class ChangeStatusTests {
         private TaskContext GetInMemoryDbContext() {
             var options = new DbContextOptionsBuilder<TaskContext>()
                 .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
@@ -16,12 +16,13 @@ namespace Tasks.Api.Tests.unit {
             return new TaskContext(options);
         }
 
+        // --- Тести перевірки API проектів та наявності завдання ---
+
         [Fact]
-        public async Task UpdateTaskDetails_WhenProjectNotFound_ReturnsNotFoundError() {
+        public async Task ChangeTaskItemStatus_WhenProjectNotFound_ReturnsNotFoundError() {
             // Arrange
             var projectId = Guid.NewGuid();
             var taskId = Guid.NewGuid();
-            var requestDto = new TaskItemRequestDTO { title = "Updated Task" };
 
             var mockProjectClient = new Mock<IProjectClient>();
             mockProjectClient
@@ -32,7 +33,7 @@ namespace Tasks.Api.Tests.unit {
             var service = new TaskService(mockProjectClient.Object, context);
 
             // Act
-            var result = await service.UpdateTaskDetails(projectId, taskId, requestDto);
+            var result = await service.ChangeTaskItemStatus(projectId, taskId, TaskItemStatus.InProgress);
 
             // Assert
             Assert.True(result.IsFailed);
@@ -40,11 +41,10 @@ namespace Tasks.Api.Tests.unit {
         }
 
         [Fact]
-        public async Task UpdateTaskDetails_WhenProjectsApiUnavailable_ReturnsBadGatewayError() {
+        public async Task ChangeTaskItemStatus_WhenProjectsApiUnavailable_ReturnsBadGatewayError() {
             // Arrange
             var projectId = Guid.NewGuid();
             var taskId = Guid.NewGuid();
-            var requestDto = new TaskItemRequestDTO { title = "Updated Task" };
 
             var mockProjectClient = new Mock<IProjectClient>();
             mockProjectClient
@@ -55,7 +55,7 @@ namespace Tasks.Api.Tests.unit {
             var service = new TaskService(mockProjectClient.Object, context);
 
             // Act
-            var result = await service.UpdateTaskDetails(projectId, taskId, requestDto);
+            var result = await service.ChangeTaskItemStatus(projectId, taskId, TaskItemStatus.InProgress);
 
             // Assert
             Assert.True(result.IsFailed);
@@ -63,11 +63,10 @@ namespace Tasks.Api.Tests.unit {
         }
 
         [Fact]
-        public async Task UpdateTaskDetails_WhenTaskDoesNotExist_ReturnsNotFoundError() {
+        public async Task ChangeTaskItemStatus_WhenTaskDoesNotExist_ReturnsNotFoundError() {
             // Arrange
             var projectId = Guid.NewGuid();
             var taskId = Guid.NewGuid();
-            var requestDto = new TaskItemRequestDTO { title = "Updated Task" };
             var activeProject = new ProjectDTO(projectId, "title", false);
 
             var mockProjectClient = new Mock<IProjectClient>();
@@ -79,7 +78,7 @@ namespace Tasks.Api.Tests.unit {
             var service = new TaskService(mockProjectClient.Object, context);
 
             // Act
-            var result = await service.UpdateTaskDetails(projectId, taskId, requestDto);
+            var result = await service.ChangeTaskItemStatus(projectId, taskId, TaskItemStatus.InProgress);
 
             // Assert
             Assert.True(result.IsFailed);
@@ -87,8 +86,10 @@ namespace Tasks.Api.Tests.unit {
             Assert.Equal("No task with specified id", result.Errors.First().Message);
         }
 
+        // --- Тести дозволених переходів статусів (Happy Path) ---
+
         [Fact]
-        public async Task UpdateTaskDetails_WhenTaskExistsAndProjectIsValid_UpdatesTaskAndReturnsOk() {
+        public async Task ChangeTaskItemStatus_FromToDoToInProgress_ReturnsOkAndUpdatesTask() {
             // Arrange
             var projectId = Guid.NewGuid();
             var activeProject = new ProjectDTO(projectId, "title", false);
@@ -100,42 +101,27 @@ namespace Tasks.Api.Tests.unit {
 
             using var context = GetInMemoryDbContext();
 
-            var task = new TaskItem(projectId, "Old Title", "Old Description", "Old Assignee", null);
+            // За замовчуванням нове завдання має статус ToDo
+            var task = new TaskItem(projectId, "Title", "Description", "Assignee", null);
             var taskId = task.id;
-            var originalCreatedAt = task.createdAt;
+            var originalUpdatedAt = task.updatedAt;
 
             await context.AddAsync(task);
             await context.SaveChangesAsync();
 
             var service = new TaskService(mockProjectClient.Object, context);
 
-            var requestDto = new TaskItemRequestDTO {
-                title = "Updated Title",
-                description = "Updated Description",
-                assignee = "Updated Assignee",
-                dueDate = DateTimeOffset.UtcNow.AddDays(5)
-            };
-
             // Act
-            var result = await service.UpdateTaskDetails(projectId, taskId, requestDto);
+            var result = await service.ChangeTaskItemStatus(projectId, taskId, TaskItemStatus.InProgress);
 
             // Assert
             Assert.True(result.IsSuccess);
-            Assert.NotNull(result.Value);
-            Assert.Equal(taskId, result.Value.id);
-            Assert.Equal("Updated Title", result.Value.title);
-            Assert.Equal("Updated Description", result.Value.description);
-            Assert.Equal("Updated Assignee", result.Value.assignee);
-            Assert.NotNull(result.Value.dueDate);
-            Assert.Equal(originalCreatedAt, result.Value.createdAt);
-            Assert.True(result.Value.updatedAt > originalCreatedAt);
+            Assert.Equal(TaskItemStatus.InProgress, result.Value.status);
+            Assert.True(result.Value.updatedAt > originalUpdatedAt); // Перевірка оновлення updatedAt
         }
-          
 
-       
-        
         [Fact]
-        public async Task UpdateTaskDetails_DoesNotChangeStatusOrProjectId() {
+        public async Task ChangeTaskItemStatus_FromInProgressToDone_ReturnsOkAndUpdatesTask() {
             // Arrange
             var projectId = Guid.NewGuid();
             var activeProject = new ProjectDTO(projectId, "title", false);
@@ -146,34 +132,29 @@ namespace Tasks.Api.Tests.unit {
                 .ReturnsAsync(Result.Ok(activeProject));
 
             using var context = GetInMemoryDbContext();
-
-            var task = new TaskItem(projectId, "Old Title", "Old Description", "Old Assignee", null);
+            var task = new TaskItem(projectId, "Title", "Description", "Assignee", null);
+            task.setStatus(TaskItemStatus.InProgress); // Попередньо переводимо в InProgress
             var taskId = task.id;
-            var originalStatus = task.status;
-            var originalProjectId = task.projectId;
+            var originalUpdatedAt = task.updatedAt;
 
             await context.AddAsync(task);
             await context.SaveChangesAsync();
 
             var service = new TaskService(mockProjectClient.Object, context);
 
-            var requestDto = new TaskItemRequestDTO {
-                title = "Updated Title",
-                description = "Updated Description"
-            };
-
             // Act
-            var result = await service.UpdateTaskDetails(projectId, taskId, requestDto);
+            var result = await service.ChangeTaskItemStatus(projectId, taskId, TaskItemStatus.Done);
 
             // Assert
             Assert.True(result.IsSuccess);
-            Assert.NotNull(result.Value);
-            Assert.Equal(originalStatus, result.Value.status);
-            Assert.Equal(originalProjectId, result.Value.projectId);
+            Assert.Equal(TaskItemStatus.Done, result.Value.status);
+            Assert.True(result.Value.updatedAt > originalUpdatedAt);
         }
 
+        // --- Тести заборонених переходів статусів (Conflict) ---
+
         [Fact]
-        public async Task UpdateTaskDetails_UpdatesTimestampInDatabase() {
+        public async Task ChangeTaskItemStatus_FromToDoToDone_ReturnsConflictError() {
             // Arrange
             var projectId = Guid.NewGuid();
             var activeProject = new ProjectDTO(projectId, "title", false);
@@ -184,47 +165,7 @@ namespace Tasks.Api.Tests.unit {
                 .ReturnsAsync(Result.Ok(activeProject));
 
             using var context = GetInMemoryDbContext();
-
-            var task = new TaskItem(projectId, "Old Title", "Old Description", "Old Assignee", null);
-            var taskId = task.id;
-            var originalCreatedAt = task.createdAt;
-
-            await context.AddAsync(task);
-            await context.SaveChangesAsync();
-
-            var service = new TaskService(mockProjectClient.Object, context);
-
-            var requestDto = new TaskItemRequestDTO { title = "Updated Title" };
-
-            // Act
-            var result = await service.UpdateTaskDetails(projectId, taskId, requestDto);
-
-            // Assert
-            Assert.True(result.IsSuccess);
-            Assert.True(result.Value!.updatedAt >= originalCreatedAt);
-            Assert.NotEqual(originalCreatedAt, result.Value.updatedAt);
-
-            // Verify the change is saved to the database
-            var refreshedTask = await context.Set<TaskItem>().FirstOrDefaultAsync(t => t.id == taskId);
-            Assert.NotNull(refreshedTask);
-            Assert.True(refreshedTask.updatedAt > originalCreatedAt);
-        }
-
-        [Fact]
-        public async Task UpdateTaskDetails_WhenTaskBelongsToDifferentProject_ReturnsNotFoundError() {
-            // Arrange
-            var projectId1 = Guid.NewGuid();
-            var projectId2 = Guid.NewGuid();
-            var activeProject = new ProjectDTO(projectId1, "title", false);
-
-            var mockProjectClient = new Mock<IProjectClient>();
-            mockProjectClient
-                .Setup(c => c.GetProjectByIdAsync(projectId1))
-                .ReturnsAsync(Result.Ok(activeProject));
-
-            using var context = GetInMemoryDbContext();
-
-            var task = new TaskItem(projectId2, "Task Title", "Description", "Assignee", null);
+            var task = new TaskItem(projectId, "Title", "Description", "Assignee", null); // Статус ToDo
             var taskId = task.id;
 
             await context.AddAsync(task);
@@ -232,14 +173,74 @@ namespace Tasks.Api.Tests.unit {
 
             var service = new TaskService(mockProjectClient.Object, context);
 
-            var requestDto = new TaskItemRequestDTO { title = "Updated Title" };
-
             // Act
-            var result = await service.UpdateTaskDetails(projectId1, taskId, requestDto);
+            var result = await service.ChangeTaskItemStatus(projectId, taskId, TaskItemStatus.Done);
 
             // Assert
             Assert.True(result.IsFailed);
-            Assert.IsType<NotFoundError>(result.Errors.First());
+            Assert.IsType<ConflictError>(result.Errors.First());
+            Assert.Contains("Can't change status", result.Errors.First().Message);
+        }
+
+        [Fact]
+        public async Task ChangeTaskItemStatus_FromInProgressToToDo_ReturnsConflictError() {
+            // Arrange
+            var projectId = Guid.NewGuid();
+            var activeProject = new ProjectDTO(projectId, "title", false);
+
+            var mockProjectClient = new Mock<IProjectClient>();
+            mockProjectClient
+                .Setup(c => c.GetProjectByIdAsync(projectId))
+                .ReturnsAsync(Result.Ok(activeProject));
+
+            using var context = GetInMemoryDbContext();
+            var task = new TaskItem(projectId, "Title", "Description", "Assignee", null);
+            task.setStatus(TaskItemStatus.InProgress); // Статус InProgress
+            var taskId = task.id;
+
+            await context.AddAsync(task);
+            await context.SaveChangesAsync();
+
+            var service = new TaskService(mockProjectClient.Object, context);
+
+            // Act
+            var result = await service.ChangeTaskItemStatus(projectId, taskId, TaskItemStatus.ToDo);
+
+            // Assert
+            Assert.True(result.IsFailed);
+            Assert.IsType<ConflictError>(result.Errors.First());
+        }
+
+        [Theory]
+        [InlineData(TaskItemStatus.ToDo)]
+        [InlineData(TaskItemStatus.InProgress)]
+        public async Task ChangeTaskItemStatus_FromDoneToAnyStatus_ReturnsConflictError(TaskItemStatus targetStatus) {
+            // Arrange
+            var projectId = Guid.NewGuid();
+            var activeProject = new ProjectDTO(projectId, "title", false);
+
+            var mockProjectClient = new Mock<IProjectClient>();
+            mockProjectClient
+                .Setup(c => c.GetProjectByIdAsync(projectId))
+                .ReturnsAsync(Result.Ok(activeProject));
+
+            using var context = GetInMemoryDbContext();
+            var task = new TaskItem(projectId, "Title", "Description", "Assignee", null);
+            task.setStatus(TaskItemStatus.InProgress);
+            task.setStatus(TaskItemStatus.Done); // Переводимо до кінцевого статусу Done
+            var taskId = task.id;
+
+            await context.AddAsync(task);
+            await context.SaveChangesAsync();
+
+            var service = new TaskService(mockProjectClient.Object, context);
+
+            // Act
+            var result = await service.ChangeTaskItemStatus(projectId, taskId, targetStatus);
+
+            // Assert
+            Assert.True(result.IsFailed);
+            Assert.IsType<ConflictError>(result.Errors.First());
         }
     }
 }

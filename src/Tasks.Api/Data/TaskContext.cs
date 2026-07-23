@@ -9,5 +9,6 @@ namespace Tasks.Api.Data {
         protected override void OnModelCreating(ModelBuilder modelBuilder) {
             modelBuilder.Entity<TaskItem>().ToContainer("tasks").HasPartitionKey(p => p.projectId);
         }
+      
     }
 }
