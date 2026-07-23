@@ -101,6 +101,7 @@ namespace Tasks.Api.Tests.unit {
             using var context = GetInMemoryDbContext();
 
             var task = new TaskItem(projectId, "Old Title", "Old Description", "Old Assignee", null);
+            var oldUpdate = task.updatedAt;
             var taskId = task.id;
             var originalCreatedAt = task.createdAt;
 
@@ -128,9 +129,9 @@ namespace Tasks.Api.Tests.unit {
             Assert.Equal("Updated Assignee", result.Value.assignee);
             Assert.NotNull(result.Value.dueDate);
             Assert.Equal(originalCreatedAt, result.Value.createdAt);
+            Assert.NotEqual(result.Value.updatedAt, oldUpdate);
             Assert.True(result.Value.updatedAt > originalCreatedAt);
-        }
-          
+        }       
 
        
         
@@ -151,6 +152,8 @@ namespace Tasks.Api.Tests.unit {
             var taskId = task.id;
             var originalStatus = task.status;
             var originalProjectId = task.projectId;
+            var oldUpdate = task.updatedAt;
+
 
             await context.AddAsync(task);
             await context.SaveChangesAsync();
@@ -170,6 +173,7 @@ namespace Tasks.Api.Tests.unit {
             Assert.NotNull(result.Value);
             Assert.Equal(originalStatus, result.Value.status);
             Assert.Equal(originalProjectId, result.Value.projectId);
+            Assert.NotEqual(result.Value.updatedAt, oldUpdate);
         }
 
         [Fact]
