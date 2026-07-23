@@ -54,7 +54,7 @@ namespace Tasks.Api.Tests.integration {
             var context = scope.ServiceProvider.GetRequiredService<TaskContext>();
 
             var task = new TaskItem(projectId, "Test Task", "Desc", "Assignee", null);
-            task.setStatus(initialStatus);
+            task.SetStatus(initialStatus);
 
             context.TaskItems.Add(task);
             await context.SaveChangesAsync();

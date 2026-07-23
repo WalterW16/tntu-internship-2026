@@ -22,7 +22,7 @@ namespace Tasks.Api.Models {
             createdAt = DateTimeOffset.UtcNow;
             updatedAt = DateTimeOffset.UtcNow;
         }
-        private bool canBeChangedTo(TaskItemStatus status) {
+        private bool CanBeChangedTo(TaskItemStatus status) {
             if (this.status == TaskItemStatus.ToDo && status == TaskItemStatus.InProgress) {
                 return true;
             }
@@ -31,8 +31,8 @@ namespace Tasks.Api.Models {
             }
             return false;
         }
-        public bool setStatus(TaskItemStatus status) {
-            if (canBeChangedTo(status)) {
+        public bool SetStatus(TaskItemStatus status) {
+            if (CanBeChangedTo(status)) {
                 this.status = status;
                 return true;
             }

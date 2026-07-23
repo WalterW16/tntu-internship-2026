@@ -133,7 +133,7 @@ namespace Tasks.Api.Tests.unit {
 
             using var context = GetInMemoryDbContext();
             var task = new TaskItem(projectId, "Title", "Description", "Assignee", null);
-            task.setStatus(TaskItemStatus.InProgress); // Попередньо переводимо в InProgress
+            task.SetStatus(TaskItemStatus.InProgress); // Попередньо переводимо в InProgress
             var taskId = task.id;
             var originalUpdatedAt = task.updatedAt;
 
@@ -195,7 +195,7 @@ namespace Tasks.Api.Tests.unit {
 
             using var context = GetInMemoryDbContext();
             var task = new TaskItem(projectId, "Title", "Description", "Assignee", null);
-            task.setStatus(TaskItemStatus.InProgress); // Статус InProgress
+            task.SetStatus(TaskItemStatus.InProgress); // Статус InProgress
             var taskId = task.id;
 
             await context.AddAsync(task);
@@ -226,8 +226,8 @@ namespace Tasks.Api.Tests.unit {
 
             using var context = GetInMemoryDbContext();
             var task = new TaskItem(projectId, "Title", "Description", "Assignee", null);
-            task.setStatus(TaskItemStatus.InProgress);
-            task.setStatus(TaskItemStatus.Done); // Переводимо до кінцевого статусу Done
+            task.SetStatus(TaskItemStatus.InProgress);
+            task.SetStatus(TaskItemStatus.Done); // Переводимо до кінцевого статусу Done
             var taskId = task.id;
 
             await context.AddAsync(task);

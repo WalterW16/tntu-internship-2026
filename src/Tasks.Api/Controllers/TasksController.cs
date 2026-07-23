@@ -1,6 +1,7 @@
 ﻿using Asp.Versioning;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Net.NetworkInformation;
 using Tasks.Api.Errors;
 using Tasks.Api.Models;
 using Tasks.Api.Models.Tasks.Api.Models;
@@ -207,5 +208,39 @@ namespace Tasks.Api.Controllers {
             title: "Internal Server Error"
             );
         }
+        // /api/v1/projects/{projectId}/tasks/{taskId}
+        [HttpDelete("{projectId}/tasks/{taskId}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status502BadGateway)]
+        public async Task<ActionResult> DeleteTask(Guid projectId, Guid taskId) {
+            var result = await _service.DeleteTask(projectId, taskId);
+            if (result.HasError<NotFoundError>()) {
+                var error = result.Errors.OfType<NotFoundError>().First();
+                var problem = new ProblemDetails {
+                    Status = StatusCodes.Status404NotFound,
+                    Title = "Resource not found",
+                    Detail = error.Message
+                };
+                return NotFound(problem);
+            }
+            if (result.HasError<BadGatewayError>()) {
+                var error = result.Errors.OfType<BadGatewayError>().First();
+                var problem = new ProblemDetails {
+                    Status = StatusCodes.Status502BadGateway,
+                    Title = "BadGateway",
+                    Detail = error.Message
+                };
+                return StatusCode(StatusCodes.Status502BadGateway, problem);
+            }
+            if (result.IsSuccess) {
+                return NoContent();
+            }
+            return Problem(
+            detail: "An unexpected error occurred.",
+            statusCode: StatusCodes.Status500InternalServerError,
+            title: "Internal Server Error"
+            );
         }
+       }
     }
