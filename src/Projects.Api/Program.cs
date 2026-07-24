@@ -1,8 +1,10 @@
 using Asp.Versioning;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Cosmos;
 using Projects.Api.Data;
 using Projects.Api.Services;
+using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("ProjectContext") ?? throw new InvalidOperationException("Connection string 'ProjectContext' not found.");
@@ -34,7 +36,18 @@ builder.Services.AddApiVersioning(options => {
 
 builder.Services.AddDbContext<ProjectContext>(opt =>
 opt.UseCosmos(cosmosEndpoint, cosmosKey, databaseName));
-builder.Services.AddScoped<IProjectService, ProjectsService>();
+builder.Services.AddHealthChecks()
+    .AddDbContextCheck<ProjectContext>( 
+        name: "cosmosdb",
+        customTestQuery: async (context, cancellationToken) => {
+            try {
+                var cosmosClient = context.Database.GetCosmosClient();
+                await cosmosClient.ReadAccountAsync();
+                return true; 
+            } catch {
+                return false; 
+            }
+        }); builder.Services.AddScoped<IProjectService, ProjectsService>();
 
 var app = builder.Build();
 
@@ -61,5 +74,18 @@ app.UseAuthorization();
 
 app.MapControllers();
 
+app.MapHealthChecks("/health", new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions {
+    ResponseWriter = async (context, report) => {
+        context.Response.ContentType = "application/json";
+        var response = new {
+            status = report.Status.ToString(),
+            checks = report.Entries.Select(e => new {
+                name = e.Key,
+                status = e.Value.Status.ToString()
+            })
+        };
+        await JsonSerializer.SerializeAsync(context.Response.Body, response);
+    }
+});
 app.Run();
 public partial class Program { }
