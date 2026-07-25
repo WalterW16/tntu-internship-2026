@@ -1,5 +1,6 @@
 using FluentResults;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using Tasks.Api.Data;
 using Tasks.Api.Errors;
@@ -26,7 +27,7 @@ namespace Tasks.Api.Tests.unit {
                 .ReturnsAsync(Result.Fail(new NotFoundError("Project not found")));
 
             using var context = GetInMemoryDbContext();
-            var service = new TaskService(mockProjectClient.Object, context);
+            var service = new TaskService(mockProjectClient.Object, context, NullLogger<TaskService>.Instance);
 
             // Act
             var result = await service.GetListOfTasksForProjectAsync(projectId);
@@ -46,7 +47,7 @@ namespace Tasks.Api.Tests.unit {
                 .ReturnsAsync(Result.Fail(new BadGatewayError("Projects API is unavailable.")));
 
             using var context = GetInMemoryDbContext();
-            var service = new TaskService(mockProjectClient.Object, context);
+            var service = new TaskService(mockProjectClient.Object, context, NullLogger<TaskService>.Instance);
 
             // Act
             var result = await service.GetListOfTasksForProjectAsync(projectId);
@@ -68,7 +69,7 @@ namespace Tasks.Api.Tests.unit {
                 .ReturnsAsync(Result.Ok(activeProject));
 
             using var context = GetInMemoryDbContext();
-            var service = new TaskService(mockProjectClient.Object, context);
+            var service = new TaskService(mockProjectClient.Object, context, NullLogger<TaskService>.Instance       );
 
             // Act
             var result = await service.GetListOfTasksForProjectAsync(projectId);
@@ -101,7 +102,7 @@ namespace Tasks.Api.Tests.unit {
             await context.AddRangeAsync(olderTask, newerTask, otherProjectTask);
             await context.SaveChangesAsync();
 
-            var service = new TaskService(mockProjectClient.Object, context);
+            var service = new TaskService(mockProjectClient.Object, context, NullLogger<TaskService>.Instance);
 
             // Act
             var result = await service.GetListOfTasksForProjectAsync(targetProjectId);

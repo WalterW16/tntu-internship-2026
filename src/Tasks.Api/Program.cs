@@ -5,6 +5,7 @@ using Tasks.Api.Services;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using System.Text.Json;
+using Azure.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -58,7 +59,7 @@ builder.Services.AddApiVersioning(options => {
     options.GroupNameFormat = "'v'V";
     options.SubstituteApiVersionInUrl = true;
 });
-
+builder.Services.AddApplicationInsightsTelemetry();
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope()) {

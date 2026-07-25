@@ -1,13 +1,14 @@
 using Asp.Versioning;
-using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Cosmos;
 using Projects.Api.Data;
 using Projects.Api.Services;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using System.Text.Json;
+using Azure.Identity;
+
 
 var builder = WebApplication.CreateBuilder(args);
-var connectionString = builder.Configuration.GetConnectionString("ProjectContext") ?? throw new InvalidOperationException("Connection string 'ProjectContext' not found.");
 
 var cosmosEndpoint = builder.Configuration["CosmosDb:Endpoint"];
 var cosmosKey = builder.Configuration["CosmosDb:Key"];
@@ -36,6 +37,7 @@ builder.Services.AddApiVersioning(options => {
 
 builder.Services.AddDbContext<ProjectContext>(opt =>
 opt.UseCosmos(cosmosEndpoint, cosmosKey, databaseName));
+
 builder.Services.AddHealthChecks()
     .AddDbContextCheck<ProjectContext>( 
         name: "cosmosdb",
@@ -48,6 +50,8 @@ builder.Services.AddHealthChecks()
                 return false; 
             }
         }); builder.Services.AddScoped<IProjectService, ProjectsService>();
+
+builder.Services.AddApplicationInsightsTelemetry();
 
 var app = builder.Build();
 
