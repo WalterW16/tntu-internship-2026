@@ -58,7 +58,7 @@ builder.Services.AddApiVersioning(options => {
     options.GroupNameFormat = "'v'V";
     options.SubstituteApiVersionInUrl = true;
 });
-
+builder.Services.AddApplicationInsightsTelemetry();
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope()) {
