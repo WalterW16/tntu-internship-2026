@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using System;
@@ -13,6 +14,10 @@ namespace Tasks.Api.Tests.integration {
         public Mock<IProjectClient>? ProjectClientMock { get; private set; }
 
         protected override void ConfigureWebHost(IWebHostBuilder builder) {
+            builder.ConfigureAppConfiguration((context, config) => {
+                _ = config.AddInMemoryCollection(new Dictionary<string, string>
+                {{ "APPLICATIONINSIGHTS_CONNECTION_STRING", "InstrumentationKey=00000000-0000-0000-0000-000000000000;" }});
+            });
             builder.ConfigureServices(services => {
                 var descriptor = services.SingleOrDefault(
                     d => d.ServiceType == typeof(DbContextOptions<TaskContext>));
