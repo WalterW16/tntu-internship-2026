@@ -5,11 +5,13 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>b5905676-4a48-4eaa-a87b-67118ff11d1c</UserSecretsId>
+    <ApplicationInsightsResourceId>/subscriptions/fa9934f2-7d7d-4950-9478-66d81391e60d/resourceGroups/rg-tntu-taskboard/providers/microsoft.insights/components/appi-tntu-taskboard</ApplicationInsightsResourceId>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Asp.Versioning.Mvc" Version="8.1.1" />
     <PackageReference Include="Asp.Versioning.Mvc.ApiExplorer" Version="8.1.1" />
+    <PackageReference Include="Azure.Identity" Version="1.21.0" />
     <PackageReference Include="FluentResults" Version="4.0.0" />
     <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="3.1.2" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.28" />

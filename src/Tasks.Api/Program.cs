@@ -5,6 +5,7 @@ using Tasks.Api.Services;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using System.Text.Json;
+using Azure.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
 
