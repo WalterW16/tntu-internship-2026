@@ -1,15 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using FluentResults;
+﻿using FluentResults;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging.Abstractions;
 using MockQueryable.Moq;
 using Moq;
 using Projects.Api.Data;
 using Projects.Api.Errors;
 using Projects.Api.Models;
 using Projects.Api.Services;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace Projects.Api.Tests.unit {
@@ -20,7 +21,7 @@ namespace Projects.Api.Tests.unit {
         public ProjectServiceTests() {
             var dummyOptions = new DbContextOptions<ProjectContext>();
             _projectContextMock = new Mock<ProjectContext>(dummyOptions);
-            _projectsService = new ProjectsService(_projectContextMock.Object);
+            _projectsService = new ProjectsService(_projectContextMock.Object, NullLogger<ProjectsService>.Instance);
         }
 
 
