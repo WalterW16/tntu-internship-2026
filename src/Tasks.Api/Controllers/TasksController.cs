@@ -28,27 +28,33 @@ namespace Tasks.Api.Controllers {
             if (result.HasError<NotFoundError>()) {
                 var error = result.Errors.OfType<NotFoundError>().First();
                 var problem = new ProblemDetails {
+                    Type = "https://tools.ietf.org/html/rfc9110#section-15.5.5",
                     Status = StatusCodes.Status404NotFound,
                     Title = "Resource not found",
-                    Detail = error.Message
+                    Detail = error.Message,
+                    Instance = HttpContext.Request.Path
                 };
                 return NotFound(problem);
             }
             if (result.HasError<ConflictError>()) {
                 var error = result.Errors.OfType<ConflictError>().First();
                 var problem = new ProblemDetails {
-                    Status = StatusCodes.Status409Conflict,
+                    Type = "https://tools.ietf.org/html/rfc9110#section-15.5.10",
                     Title = "Conflict",
-                    Detail = error.Message
+                    Status = StatusCodes.Status409Conflict,                  
+                    Detail = error.Message,
+                    Instance = HttpContext.Request.Path
                 };
                 return Conflict(problem);
             }
             if (result.HasError<BadGatewayError>()) {
                 var error = result.Errors.OfType<BadGatewayError>().First();
                 var problem = new ProblemDetails {
-                    Status = StatusCodes.Status502BadGateway,
-                    Title = "BadGateway",
-                    Detail = error.Message
+                    Type = "https://tools.ietf.org/html/rfc9110#section-15.5.5",
+                    Status = StatusCodes.Status404NotFound,
+                    Title = "Resource not found",
+                    Detail = error.Message,
+                    Instance = HttpContext.Request.Path
                 };
                 return StatusCode(StatusCodes.Status502BadGateway, problem);
             }
@@ -72,18 +78,22 @@ namespace Tasks.Api.Controllers {
             if (result.HasError<NotFoundError>()) {
                 var error = result.Errors.OfType<NotFoundError>().First();
                 var problem = new ProblemDetails {
+                    Type = "https://tools.ietf.org/html/rfc9110#section-15.5.5",
                     Status = StatusCodes.Status404NotFound,
                     Title = "Resource not found",
-                    Detail = error.Message
+                    Detail = error.Message,
+                    Instance = HttpContext.Request.Path
                 };
                 return NotFound(problem);
             }
             if (result.HasError<BadGatewayError>()) {
                 var error = result.Errors.OfType<BadGatewayError>().First();
                 var problem = new ProblemDetails {
-                    Status = StatusCodes.Status502BadGateway,
-                    Title = "BadGateway",
-                    Detail = error.Message
+                    Type = "https://tools.ietf.org/html/rfc9110#section-15.5.5",
+                    Status = StatusCodes.Status404NotFound,
+                    Title = "Resource not found",
+                    Detail = error.Message,
+                    Instance = HttpContext.Request.Path
                 };
                 return StatusCode(StatusCodes.Status502BadGateway, problem);
             }
@@ -106,18 +116,22 @@ namespace Tasks.Api.Controllers {
             if (result.HasError<NotFoundError>()) {
                 var error = result.Errors.OfType<NotFoundError>().First();
                 var problem = new ProblemDetails {
+                    Type = "https://tools.ietf.org/html/rfc9110#section-15.5.5",
                     Status = StatusCodes.Status404NotFound,
                     Title = "Resource not found",
-                    Detail = error.Message
+                    Detail = error.Message,
+                    Instance = HttpContext.Request.Path
                 };
                 return NotFound(problem);
             }
             if (result.HasError<BadGatewayError>()) {
                 var error = result.Errors.OfType<BadGatewayError>().First();
                 var problem = new ProblemDetails {
+                    Type = "https://tools.ietf.org/html/rfc9110#section-15.6.3",
+                    Title = "Bad Gateway",
                     Status = StatusCodes.Status502BadGateway,
-                    Title = "BadGateway",
-                    Detail = error.Message
+                    Detail = error.Message,
+                    Instance = HttpContext.Request.Path
                 };
                 return StatusCode(StatusCodes.Status502BadGateway, problem);
             }
@@ -140,18 +154,22 @@ namespace Tasks.Api.Controllers {
             if (result.HasError<NotFoundError>()) {
                 var error = result.Errors.OfType<NotFoundError>().First();
                 var problem = new ProblemDetails {
+                    Type = "https://tools.ietf.org/html/rfc9110#section-15.5.5",
                     Status = StatusCodes.Status404NotFound,
                     Title = "Resource not found",
-                    Detail = error.Message
+                    Detail = error.Message,
+                    Instance = HttpContext.Request.Path
                 };
                 return NotFound(problem);
             }
             if (result.HasError<BadGatewayError>()) {
                 var error = result.Errors.OfType<BadGatewayError>().First();
                 var problem = new ProblemDetails {
+                    Type = "https://tools.ietf.org/html/rfc9110#section-15.6.3",
+                    Title = "Bad Gateway",
                     Status = StatusCodes.Status502BadGateway,
-                    Title = "BadGateway",
-                    Detail = error.Message
+                    Detail = error.Message,
+                    Instance = HttpContext.Request.Path
                 };
                 return StatusCode(StatusCodes.Status502BadGateway, problem);
             }
@@ -175,27 +193,33 @@ namespace Tasks.Api.Controllers {
             if (result.HasError<NotFoundError>()) {
                 var error = result.Errors.OfType<NotFoundError>().First();
                 var problem = new ProblemDetails {
+                    Type = "https://tools.ietf.org/html/rfc9110#section-15.5.5",
                     Status = StatusCodes.Status404NotFound,
                     Title = "Resource not found",
-                    Detail = error.Message
+                    Detail = error.Message,
+                    Instance = HttpContext.Request.Path
                 };
                 return NotFound(problem);
             }
             if (result.HasError<BadGatewayError>()) {
                 var error = result.Errors.OfType<BadGatewayError>().First();
                 var problem = new ProblemDetails {
+                    Type = "https://tools.ietf.org/html/rfc9110#section-15.6.3",
+                    Title = "Bad Gateway",
                     Status = StatusCodes.Status502BadGateway,
-                    Title = "BadGateway",
-                    Detail = error.Message
+                    Detail = error.Message,
+                    Instance = HttpContext.Request.Path
                 };
                 return StatusCode(StatusCodes.Status502BadGateway, problem);
             }
             if (result.HasError<ConflictError>()) {
                 var error = result.Errors.OfType<ConflictError>().First();
                 var problem = new ProblemDetails {
-                    Status = StatusCodes.Status409Conflict,
+                    Type = "https://tools.ietf.org/html/rfc9110#section-15.5.10",
                     Title = "Conflict",
-                    Detail = error.Message
+                    Status = StatusCodes.Status409Conflict,
+                    Detail = error.Message,
+                    Instance = HttpContext.Request.Path
                 };
                 return Conflict(problem);
             }
@@ -218,18 +242,22 @@ namespace Tasks.Api.Controllers {
             if (result.HasError<NotFoundError>()) {
                 var error = result.Errors.OfType<NotFoundError>().First();
                 var problem = new ProblemDetails {
+                    Type = "https://tools.ietf.org/html/rfc9110#section-15.5.5",
                     Status = StatusCodes.Status404NotFound,
                     Title = "Resource not found",
-                    Detail = error.Message
+                    Detail = error.Message,
+                    Instance = HttpContext.Request.Path
                 };
                 return NotFound(problem);
             }
             if (result.HasError<BadGatewayError>()) {
                 var error = result.Errors.OfType<BadGatewayError>().First();
                 var problem = new ProblemDetails {
-                    Status = StatusCodes.Status502BadGateway,
-                    Title = "BadGateway",
-                    Detail = error.Message
+                    Type = "https://tools.ietf.org/html/rfc9110#section-15.6.3",
+                    Title = "Bad Gateway",
+                    Status = StatusCodes.Status502BadGateway,                    
+                    Detail = error.Message,
+                    Instance = HttpContext.Request.Path
                 };
                 return StatusCode(StatusCodes.Status502BadGateway, problem);
             }

@@ -59,6 +59,7 @@ builder.Services.AddApiVersioning(options => {
     options.GroupNameFormat = "'v'V";
     options.SubstituteApiVersionInUrl = true;
 });
+builder.Services.AddProblemDetails();
 builder.Services.AddApplicationInsightsTelemetry();
 var app = builder.Build();
 
