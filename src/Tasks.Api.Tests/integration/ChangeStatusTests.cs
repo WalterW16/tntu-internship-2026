@@ -199,7 +199,7 @@ namespace Tasks.Api.Tests.integration {
             var problemDetails = await response.Content.ReadFromJsonAsync<ProblemDetails>();
             Assert.NotNull(problemDetails);
             Assert.Equal(502, problemDetails.Status);
-            Assert.Equal("BadGateway", problemDetails.Title);
+            Assert.Equal("Bad Gateway", problemDetails.Title);
         }
     }
 }
