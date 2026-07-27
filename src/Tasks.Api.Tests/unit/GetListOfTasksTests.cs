@@ -69,7 +69,7 @@ namespace Tasks.Api.Tests.unit {
                 .ReturnsAsync(Result.Ok(activeProject));
 
             using var context = GetInMemoryDbContext();
-            var service = new TaskService(mockProjectClient.Object, context, NullLogger<TaskService>.Instance       );
+            var service = new TaskService(mockProjectClient.Object, context, NullLogger<TaskService>.Instance);
 
             // Act
             var result = await service.GetListOfTasksForProjectAsync(projectId);
@@ -77,7 +77,7 @@ namespace Tasks.Api.Tests.unit {
             // Assert
             Assert.True(result.IsSuccess);
             Assert.NotNull(result.Value);
-            Assert.Empty(result.Value); 
+            Assert.Empty(result.Value);
         }
 
         [Fact]
@@ -117,6 +117,51 @@ namespace Tasks.Api.Tests.unit {
 
             Assert.Equal(newerTask.title, returnedTasks[0].title);
             Assert.Equal(olderTask.title, returnedTasks[1].title);
+        }
+              
+        [Theory]
+        [InlineData(TaskItemStatus.ToDo)]
+        [InlineData(TaskItemStatus.InProgress)]
+        [InlineData(TaskItemStatus.Done)]
+        public async Task GetListOfTasksForProjectAsync_WithStatusFilter_ReturnsOnlyMatchingTasks(TaskItemStatus requestedStatus) {
+            // Arrange
+            var targetProjectId = Guid.NewGuid();
+            var activeProject = new ProjectDTO(targetProjectId, "title", false);
+
+            var mockProjectClient = new Mock<IProjectClient>();
+            mockProjectClient
+                .Setup(c => c.GetProjectByIdAsync(targetProjectId))
+                .ReturnsAsync(Result.Ok(activeProject));
+
+            using var context = GetInMemoryDbContext();
+
+            // Створюємо по одній тасці кожного статусу
+            var taskToDo = new TaskItem(targetProjectId, "Task 1", "Desc", "Assignee", DateTime.UtcNow);
+            taskToDo.SetStatus(TaskItemStatus.ToDo);
+            var taskInProgress = new TaskItem(targetProjectId, "Task 2", "Desc", "Assignee", DateTime.UtcNow);
+            taskInProgress.SetStatus(TaskItemStatus.InProgress);
+            var taskDone = new TaskItem(targetProjectId, "Task 3", "Desc", "Assignee", DateTime.UtcNow);
+            taskDone.SetStatus(TaskItemStatus.InProgress);
+            taskDone.SetStatus(TaskItemStatus.Done);
+
+            await context.AddRangeAsync(taskToDo, taskInProgress, taskDone);
+            await context.SaveChangesAsync();
+
+            var service = new TaskService(mockProjectClient.Object, context, NullLogger<TaskService>.Instance);
+
+            // Act
+            // Передаємо requestedStatus у метод сервісу
+            var result = await service.FilterByStatusAsync(targetProjectId, requestedStatus);
+
+            // Assert
+            Assert.True(result.IsSuccess);
+
+            var returnedTasks = result.Value;
+
+            // Має повернутися рівно одна таска
+            Assert.Single(returnedTasks);
+            // Її статус має чітко збігатися з тим, що ми запитували
+            Assert.Equal(requestedStatus, returnedTasks.First().status);
         }
     }
 }

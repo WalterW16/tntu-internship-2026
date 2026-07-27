@@ -9,5 +9,6 @@ namespace Tasks.Api.Services {
         public Task<Result<TaskItem>> UpdateTaskDetailsAsync(Guid projectId, Guid taskId, TaskItemRequestDTO dro);
         public Task<Result<TaskItem>> ChangeTaskItemStatusAsync(Guid projectId, Guid taskId, TaskItemStatus status);
         public Task<Result> DeleteTaskAsync(Guid projectId, Guid taskId);
+        public Task<Result<List<TaskItem>>> FilterByStatusAsync(Guid projectId, TaskItemStatus status);
     }
 }

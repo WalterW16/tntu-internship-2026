@@ -60,9 +60,9 @@ namespace Tasks.Api.Tests.integration {
 
             Assert.NotNull(jsonNode);
 
-            // Читаємо статус як int і порівнюємо з числовим значенням enum
-            var returnedStatusValue = (int)jsonNode["status"]!;
-            Assert.Equal((int)TaskItemStatus.InProgress, returnedStatusValue);
+            // Читаємо статус як рядок (оскільки API тепер повертає string завдяки JsonStringEnumConverter)
+            var returnedStatusString = (string)jsonNode["status"]!;
+            Assert.Equal(TaskItemStatus.InProgress.ToString(), returnedStatusString);
 
             var updatedAtString = jsonNode["updatedAt"]?.ToString();
             Assert.NotNull(updatedAtString);
@@ -70,7 +70,6 @@ namespace Tasks.Api.Tests.integration {
             var returnedUpdatedAt = DateTime.Parse(updatedAtString);
             Assert.True(returnedUpdatedAt > testTask.createdAt);
         }
-
         [Fact]
         public async Task PatchTask_InvalidTransition_ToDoToDone_Returns409Conflict() {
             // Arrange
