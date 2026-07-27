@@ -50,7 +50,7 @@ builder.Services.AddHealthChecks()
                 return false; 
             }
         }); builder.Services.AddScoped<IProjectService, ProjectsService>();
-
+builder.Services.AddProblemDetails();
 builder.Services.AddApplicationInsightsTelemetry();
 
 var app = builder.Build();
