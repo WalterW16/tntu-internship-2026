@@ -67,9 +67,11 @@ public class ProjectsController : ControllerBase
         if (result.HasError<NotFoundError>()) {
             var error = result.Errors.OfType<NotFoundError>().First();
             var problem = new ProblemDetails {
+                Type = "https://tools.ietf.org/html/rfc9110#section-15.5.5",
+                Title = "Project not found",
                 Status = StatusCodes.Status404NotFound,
-                Title = "Project not found", 
-                Detail = error.Message       
+                Detail = error.Message,
+                Instance = HttpContext.Request.Path
             };
             return NotFound(problem);
         }
@@ -94,18 +96,22 @@ public class ProjectsController : ControllerBase
         if (result.HasError<NotFoundError>()) {
             var error = result.Errors.OfType<NotFoundError>().First();
             var problem = new ProblemDetails {
-                Status = StatusCodes.Status404NotFound,
+                Type = "https://tools.ietf.org/html/rfc9110#section-15.5.5",
                 Title = "Project not found",
-                Detail = error.Message
+                Status = StatusCodes.Status404NotFound,               
+                Detail = error.Message,
+                Instance = HttpContext.Request.Path
             };
             return NotFound(problem);
         }
         if (result.HasError<ConflictError>()) {
             var error = result.Errors.OfType<ConflictError>().First();
             var problem = new ProblemDetails {
+                Type = "https://tools.ietf.org/html/rfc9110#section-15.5.10",
                 Status = StatusCodes.Status409Conflict,
                 Title = "Conflict",
-                Detail = error.Message
+                Detail = error.Message,
+                Instance = HttpContext.Request.Path
             };
             return Conflict(problem);
         }
@@ -127,18 +133,22 @@ public class ProjectsController : ControllerBase
         if (result.HasError<NotFoundError>()) {
             var error = result.Errors.OfType<NotFoundError>().First();
             var problem = new ProblemDetails {
-                Status = StatusCodes.Status404NotFound,
+                Type = "https://tools.ietf.org/html/rfc9110#section-15.5.5",
                 Title = "Project not found",
-                Detail = error.Message
+                Status = StatusCodes.Status404NotFound,
+                Detail = error.Message,
+                Instance = HttpContext.Request.Path
             };
             return NotFound(problem);
         }
         if (result.HasError<ConflictError>()) {
             var error = result.Errors.OfType<ConflictError>().First();
             var problem = new ProblemDetails {
+                Type = "https://tools.ietf.org/html/rfc9110#section-15.5.10",
                 Status = StatusCodes.Status409Conflict,
                 Title = "Conflict",
-                Detail = error.Message
+                Detail = error.Message,
+                Instance = HttpContext.Request.Path
             };
             return Conflict(problem);
         }

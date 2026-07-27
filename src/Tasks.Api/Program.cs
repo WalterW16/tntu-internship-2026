@@ -59,6 +59,16 @@ builder.Services.AddApiVersioning(options => {
     options.GroupNameFormat = "'v'V";
     options.SubstituteApiVersionInUrl = true;
 });
+builder.Services.AddProblemDetails(options => {
+    options.CustomizeProblemDetails = context => {
+        if (string.IsNullOrEmpty(context.ProblemDetails.Instance)) {
+            context.ProblemDetails.Instance = context.HttpContext.Request.Path;
+        }
+        if (context.ProblemDetails.Extensions.ContainsKey("traceId")) {
+            context.ProblemDetails.Extensions.Remove("traceId");
+        }
+    };
+});
 builder.Services.AddApplicationInsightsTelemetry();
 var app = builder.Build();
 
