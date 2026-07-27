@@ -41,7 +41,7 @@ namespace Tasks.Api.Controllers {
                 var problem = new ProblemDetails {
                     Type = "https://tools.ietf.org/html/rfc9110#section-15.5.10",
                     Title = "Conflict",
-                    Status = StatusCodes.Status409Conflict,                  
+                    Status = StatusCodes.Status409Conflict,
                     Detail = error.Message,
                     Instance = HttpContext.Request.Path
                 };
@@ -73,8 +73,10 @@ namespace Tasks.Api.Controllers {
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(List<TaskItem>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status502BadGateway)]
-        public async Task<ActionResult<TaskItem>> GetListOfTasksForProject(Guid projectId) {
-            var result = await _service.GetListOfTasksForProjectAsync(projectId);
+        public async Task<ActionResult<TaskItem>> GetListOfTasksForProject(Guid projectId, [FromQuery] TaskItemStatus? status) {
+            var result = status.HasValue
+                ? await _service.FilterByStatusAsync(projectId, status.Value)
+                : await _service.GetListOfTasksForProjectAsync(projectId);
             if (result.HasError<NotFoundError>()) {
                 var error = result.Errors.OfType<NotFoundError>().First();
                 var problem = new ProblemDetails {
@@ -255,7 +257,7 @@ namespace Tasks.Api.Controllers {
                 var problem = new ProblemDetails {
                     Type = "https://tools.ietf.org/html/rfc9110#section-15.6.3",
                     Title = "Bad Gateway",
-                    Status = StatusCodes.Status502BadGateway,                    
+                    Status = StatusCodes.Status502BadGateway,
                     Detail = error.Message,
                     Instance = HttpContext.Request.Path
                 };
@@ -270,5 +272,5 @@ namespace Tasks.Api.Controllers {
             title: "Internal Server Error"
             );
         }
-       }
     }
+}
