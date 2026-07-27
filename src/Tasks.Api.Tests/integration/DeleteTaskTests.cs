@@ -144,7 +144,7 @@ namespace Tasks.Api.Tests.integration {
 
             Assert.NotNull(problemDetails);
             Assert.Equal(502, problemDetails.Status);
-            Assert.Equal("BadGateway", problemDetails.Title);
+            Assert.Equal("Bad Gateway", problemDetails.Title);
             Assert.Equal("Projects API is down", problemDetails.Detail);
         }
     }
