@@ -36,7 +36,7 @@ namespace Tasks.Api.Services {
             if (projectResult.IsFailed) {
                 return Result.Fail(projectResult.Errors);
             }
-            List<TaskItem> list = _context.TaskItems.Where(p => p.projectId == projectId).OrderByDescending(p => p.createdAt).ToList();
+            List<TaskItem> list = await _context.TaskItems.Where(p => p.projectId == projectId).OrderByDescending(p => p.createdAt).ToListAsync();
             return Result.Ok(list);
         }
         public async Task<Result<TaskItem>> GetTaskByIdInProjectAsync(Guid projectId, Guid taskId) {
@@ -105,6 +105,14 @@ namespace Tasks.Api.Services {
             await _context.SaveChangesAsync();
             _logger.LogInformation("Task {TaskId} deleted", taskId);
             return Result.Ok();
+        }
+        public async Task<Result<List<TaskItem>>> FilterByStatusAsync(Guid projectId, TaskItemStatus status) {
+            var projectResult = await GetValidatedProjectAsync(projectId, "Task filter");
+            if (projectResult.IsFailed) {
+                return Result.Fail(projectResult.Errors);
+            }
+            List<TaskItem> filteredList = await _context.TaskItems.Where(p => p.status==status).ToListAsync();
+            return Result.Ok(filteredList);
         }
         private async Task<Result<ProjectDTO>> GetValidatedProjectAsync(Guid projectId, string operationName) {
             var projectResult = await _projectsApiClient.GetProjectByIdAsync(projectId);
