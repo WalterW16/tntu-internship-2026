@@ -51,8 +51,8 @@ namespace Tasks.Api.Controllers {
                 var error = result.Errors.OfType<BadGatewayError>().First();
                 var problem = new ProblemDetails {
                     Type = "https://tools.ietf.org/html/rfc9110#section-15.5.5",
-                    Status = StatusCodes.Status404NotFound,
-                    Title = "Resource not found",
+                    Status = StatusCodes.Status502BadGateway,
+                    Title = "Bad Gateway",
                     Detail = error.Message,
                     Instance = HttpContext.Request.Path
                 };
@@ -90,8 +90,8 @@ namespace Tasks.Api.Controllers {
                 var error = result.Errors.OfType<BadGatewayError>().First();
                 var problem = new ProblemDetails {
                     Type = "https://tools.ietf.org/html/rfc9110#section-15.5.5",
-                    Status = StatusCodes.Status404NotFound,
-                    Title = "Resource not found",
+                    Status = StatusCodes.Status502BadGateway,
+                    Title = "Bad Gateway",
                     Detail = error.Message,
                     Instance = HttpContext.Request.Path
                 };
