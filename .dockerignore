@@ -1,0 +1,10 @@
+**/*.bin/
+**/*.obj/
+bin/
+obj/
+secrets.*
+.vscode/
+.vs/
+*.user
+.env
+**/*.env
