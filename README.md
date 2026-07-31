@@ -1,6 +1,44 @@
 # TNTU Internship 2026 - Team Task Board
 
-Team Task Board is a 1-month internship project built around two cooperating ASP.NET Core microservices: Projects.Api and Tasks.Api. The system uses EF Core with Azure Cosmos DB, follows RFC 7807 Problem Details for errors, and is designed to be deployed to Azure App Service through GitHub Actions.
+A **1-month student internship project** building a minimal **microservices-based task board** with **ASP.NET Core**, **EF Core**, **Azure Cosmos DB**, and **GitHub Actions** CI/CD.
+
+Students implement two cooperating APIs — **Projects** and **Tasks** — deploy them to Azure free tier, and learn modern backend development practices along the way.
+
+---
+
+## What you will build
+
+| Service | Responsibility |
+|---------|----------------|
+| **Projects.Api** | Create, list, update, and archive projects |
+| **Tasks.Api** | Manage tasks within projects; validates projects via HTTP |
+
+```mermaid
+flowchart LR
+  Client[API Client] --> ProjectsApi[Projects.Api]
+  Client --> TasksApi[Tasks.Api]
+  TasksApi -->|validate project| ProjectsApi
+  ProjectsApi --> Cosmos[(Cosmos DB)]
+  TasksApi --> Cosmos
+```
+
+Implementation code lives under `src/`.
+
+---
+
+## Documentation
+
+Start here based on your role:
+
+| Document | Audience | Description |
+|----------|----------|-------------|
+| [Development Prerequisites](docs/prerequisites/development-prerequisites.md) | Students (Day 1) | Software to install, Azure/GitHub accounts, environment variables |
+| [Architecture and Tech Stack](docs/architecture/architecture-and-tech-stack.md) | Students, mentors | System design, conventions, ADRs, learning links |
+| [System Overview](docs/domain/system-overview.md) | Students, mentors | Domain model, business rules, entity definitions |
+| [One-Month Schedule](docs/internship-plan/one-month-schedule.md) | Students, mentors | Week-by-week plan, demo script, grading rubric |
+| [User Stories](docs/user-stories/README.md) | Students | 18 user stories with acceptance criteria and API contracts |
+
+---
 
 ## Project Overview
 
@@ -11,6 +49,8 @@ The project models a simple task board for small teams:
 - Tasks.Api validates project existence by calling Projects.Api over HTTP before creating or listing tasks.
 
 The domain rules, API contracts, and sprint plan are documented in [docs/domain/system-overview.md](docs/domain/system-overview.md), [docs/architecture/architecture-and-tech-stack.md](docs/architecture/architecture-and-tech-stack.md), and [docs/user-stories/README.md](docs/user-stories/README.md).
+
+---
 
 ## Architecture
 
@@ -40,6 +80,8 @@ Key architecture facts:
 
 See [docs/architecture/architecture-and-tech-stack.md](docs/architecture/architecture-and-tech-stack.md) for the full architecture, cross-service flow, and CI/CD overview.
 
+---
+
 ## User Story Coverage
 
 The README-related requirements come primarily from these stories:
@@ -53,9 +95,28 @@ The README-related requirements come primarily from these stories:
 
 The rest of the user stories define the API surface and business rules this project implements.
 
+---
+
+## Tech Stack
+
+| Layer | Technology |
+|-------|------------|
+| Runtime | .NET 8 |
+| API framework | ASP.NET Core Web API |
+| ORM | Entity Framework Core + Cosmos DB provider |
+| Database | Azure Cosmos DB (free tier) |
+| Hosting | Azure App Service F1 |
+| CI/CD | GitHub Actions |
+| Testing | xUnit |
+| Optional | Docker, Docker Compose |
+
+Full details and documentation links: [Architecture and Tech Stack](docs/architecture/architecture-and-tech-stack.md).
+
+---
+
 ## Prerequisites
 
-Before running the project locally, install the items listed in [docs/prerequisites/development-prerequisites.md](docs/prerequisites/development-prerequisites.md). The minimum practical setup is:
+Complete the items in [docs/prerequisites/development-prerequisites.md](docs/prerequisites/development-prerequisites.md) before starting local development. The minimum practical setup is:
 
 - .NET 8 SDK
 - Git
@@ -63,6 +124,64 @@ Before running the project locally, install the items listed in [docs/prerequisi
 - Cosmos DB Emulator on Windows, or a reachable Cosmos DB account in Azure
 
 If you are on Windows, the Cosmos DB Emulator is the simplest local option. The current Compose file expects a Cosmos endpoint at `https://localhost:8081/` by default via `.env.example`.
+
+---
+
+## Quick Start for Students
+
+1. Complete the [prerequisites checklist](docs/prerequisites/development-prerequisites.md#verification-steps).
+2. Read [architecture](docs/architecture/architecture-and-tech-stack.md) and [domain overview](docs/domain/system-overview.md).
+3. Follow the [Week 1 schedule](docs/internship-plan/one-month-schedule.md#week-1--environment-and-projects-api-foundation).
+4. Implement user stories in order starting with [US-001](docs/user-stories/US-001-create-project.md).
+
+---
+
+## User Stories at a Glance
+
+| Sprint | Stories | Focus |
+|--------|---------|-------|
+| Week 1 | US-001 – US-003 | Projects API — create, list, get |
+| Week 2 | US-004 – US-008 | Projects complete + Tasks API start |
+| Week 3 | US-009 – US-015 | Tasks complete + Azure + CI/CD |
+| Week 4 | US-016 – US-018 (optional) | Filter, Docker, final demo |
+
+Full index: [User Stories](docs/user-stories/README.md).
+
+---
+
+## Repository Structure
+
+```text
+TNTU.Internship2026/
+├── README.md
+└── docs/
+    ├── architecture/
+    │   └── architecture-and-tech-stack.md
+    ├── prerequisites/
+    │   └── development-prerequisites.md
+    ├── domain/
+    │   └── system-overview.md
+    ├── internship-plan/
+    │   └── one-month-schedule.md
+    └── user-stories/
+        ├── README.md
+        └── US-001-create-project.md … US-018-docker-compose-local.md
+```
+
+Planned source layout:
+
+```text
+src/
+├── Projects.Api/
+├── Projects.Api.Tests/
+├── Tasks.Api/
+├── Tasks.Api.Tests/
+└── docker-compose.yml          # optional, week 4
+```
+
+The service source code lives under `src/Projects.Api` and `src/Tasks.Api`, with corresponding test projects under `src/Projects.Api.Tests` and `src/Tasks.Api.Tests`.
+
+---
 
 ## Local Setup & Running
 
@@ -105,6 +224,8 @@ The local HTTP ports from the launch settings are:
 - Projects.Api: `http://localhost:5285`
 - Tasks.Api: `http://localhost:5124`
 
+---
+
 ## Environment Variables
 
 The root [`.env.example`](.env.example) file documents the values used by Docker Compose. Copy it to `.env` and override values as needed.
@@ -124,6 +245,8 @@ Compose maps those variables into the application configuration keys expected by
 - `ProjectsApi__BaseUrl` for Tasks.Api
 
 For Azure App Service, the same settings should be provided in Application settings using double underscores, for example `CosmosDb__Endpoint` and `ProjectsApi__BaseUrl`.
+
+---
 
 ## API Endpoints
 
@@ -163,6 +286,8 @@ Main REST endpoints are versioned under `/api/v1/`.
 
 Error responses use RFC 7807 Problem Details (`application/problem+json`). The expected status codes are `400`, `404`, `409`, `502`, and `503` depending on the scenario.
 
+---
+
 ## Cross-Service Behavior
 
 Tasks.Api calls Projects.Api before creating a task and before returning task lists for a project.
@@ -174,6 +299,8 @@ Expected outcomes:
 - If the project is archived, task creation returns `409 Conflict`.
 - If Projects.Api is unavailable, Tasks.Api returns `502 Bad Gateway`.
 
+---
+
 ## CI/CD
 
 The documentation and acceptance criteria require GitHub Actions for both continuous integration and deployment:
@@ -184,11 +311,15 @@ The documentation and acceptance criteria require GitHub Actions for both contin
 
 See [docs/user-stories/US-014-github-actions-ci.md](docs/user-stories/US-014-github-actions-ci.md) and [docs/user-stories/US-015-github-actions-cd.md](docs/user-stories/US-015-github-actions-cd.md) for the required behavior.
 
-## Notes on the current Compose setup
+---
+
+## Notes on the Current Compose Setup
 
 The current `docker-compose.yml` starts both APIs and wires Tasks.Api to Projects.Api over the Compose network. It does not define a Cosmos DB container, healthcheck blocks, or named volumes yet, so the local Cosmos endpoint must be provided externally through `.env` or another reachable Cosmos instance.
 
 That means the Compose workflow is copy-pasteable today, but it depends on a reachable Cosmos DB endpoint. If you want a fully isolated emulator-based setup, the Compose file must be extended to add the emulator service and persistence volumes.
+
+---
 
 ## Related Documentation
 
@@ -198,14 +329,8 @@ That means the Compose workflow is copy-pasteable today, but it depends on a rea
 - [Development Prerequisites](docs/prerequisites/development-prerequisites.md)
 - [One-Month Schedule](docs/internship-plan/one-month-schedule.md)
 
-## Repository Structure
+---
 
-```text
-docs/
-src/
-docker-compose.yml
-.env.example
-README.md
-```
+## License and Usage
 
-The service source code lives under `src/Projects.Api` and `src/Tasks.Api`, with corresponding test projects under `src/Projects.Api.Tests` and `src/Tasks.Api.Tests`.
+This project is intended for educational use at TNTU. Mentors may adapt documentation and scope as needed.
