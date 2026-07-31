@@ -61,14 +61,6 @@ The system is split into two services with separate responsibilities and separat
 | Projects.Api | Create, list, get, update, and archive projects |
 | Tasks.Api | Create, list, get, update, delete, and change task status within a project |
 
-```mermaid
-flowchart LR
-  Client[API Client] --> ProjectsApi[Projects.Api]
-  Client --> TasksApi[Tasks.Api]
-  TasksApi -->|validate project| ProjectsApi
-  ProjectsApi --> ProjectsCosmos[(Cosmos DB: projects)]
-  TasksApi --> TasksCosmos[(Cosmos DB: tasks)]
-```
 
 Key architecture facts:
 
