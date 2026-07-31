@@ -25,7 +25,7 @@ The system is split into two services with separate responsibilities and separat
 flowchart LR
   Client[API Client] --> ProjectsApi[Projects.Api]
   Client --> TasksApi[Tasks.Api]
-  TasksApi -->|GET /api/v1/projects/{id}| ProjectsApi
+  TasksApi -->|validate project| ProjectsApi
   ProjectsApi --> ProjectsCosmos[(Cosmos DB: projects)]
   TasksApi --> TasksCosmos[(Cosmos DB: tasks)]
 ```
