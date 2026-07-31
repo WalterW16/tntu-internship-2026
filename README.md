@@ -146,6 +146,7 @@ Full index: [User Stories](docs/user-stories/README.md).
 ```text
 TNTU.Internship2026/
 ├── README.md
+├── docker-compose.yml
 └── docs/
     ├── architecture/
     │   └── architecture-and-tech-stack.md
@@ -167,8 +168,7 @@ src/
 ├── Projects.Api/
 ├── Projects.Api.Tests/
 ├── Tasks.Api/
-├── Tasks.Api.Tests/
-└── docker-compose.yml          # optional, week 4
+└── Tasks.Api.Tests/
 ```
 
 The service source code lives under `src/Projects.Api` and `src/Tasks.Api`, with corresponding test projects under `src/Projects.Api.Tests` and `src/Tasks.Api.Tests`.
